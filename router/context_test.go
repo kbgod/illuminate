@@ -477,7 +477,7 @@ func (fakeHttpClient) Do(req *http.Request) (*http.Response, error) {
 			Body: io.NopCloser(bytes.NewBuffer(respBytes)),
 		}, nil
 	}
-	return nil, errors.New("hui")
+	return nil, errors.New("req err")
 }
 
 func TestContext_Reply(t *testing.T) {
