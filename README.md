@@ -1,6 +1,6 @@
 # Golang Telegram Bot Fremework
 [![Test](https://github.com/kbgod/illuminate/actions/workflows/test.yml/badge.svg)](https://github.com/kbgod/illuminate/actions/workflows/test.yml)
-[![codecov](https://codecov.io/gh/kbgod/illuminate/branch/master/graph/badge.svg?token=RNHRHU3JZV)](https://codecov.io/gh/kbgod/illuminate)
+[![codecov](https://codecov.io/gh/kbgod/illuminate/graph/badge.svg?token=VHJJZGTWUI)](https://codecov.io/gh/kbgod/illuminate)
 Based on [paulsonoflars/gotgbot](https://github.com/paulsonoflars/gotgbot) types generation and inspired by [mr-linch/go-tg](https://github.com/mr-linch/go-tg)
 
 All the telegram types and methods are generated from
