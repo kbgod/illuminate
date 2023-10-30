@@ -32,7 +32,7 @@ go get github.com/kbgod/illuminate
 
 ## Docs
 
-Docs can be found [here](https://github.com/kbgod/illuminate/illuminate/v2).
+Docs can be found [here](https://pkg.go.dev/github.com/kbgod/illuminate).
 
 ## Contributing
 

@@ -5,9 +5,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/kbgod/illuminate/log"
+	"github.com/kbgod/illuminate/log/adapter/std"
 	"io"
 	"mime/multipart"
 	"net/http"
+	"time"
 )
 
 const DefaultAPIHost = "https://api.telegram.org"
@@ -36,10 +39,25 @@ func WithToken(token string) BotOption {
 	}
 }
 
+func WithDebugRequests(debug bool) BotOption {
+	return func(b *Bot) {
+		b.debugRequests = debug
+	}
+}
+
+func WithLogger(log log.Logger) BotOption {
+	return func(b *Bot) {
+		b.log = log
+	}
+}
+
 type Bot struct {
 	apiHost string
 	token   string
 	client  HttpDoer
+
+	debugRequests bool
+	log           log.Logger
 
 	Info *User
 }
@@ -48,6 +66,7 @@ func NewBot(opts ...BotOption) *Bot {
 	bot := &Bot{
 		apiHost: DefaultAPIHost,
 		client:  http.DefaultClient,
+		log:     std.NewAdapter(std.LevelDebug),
 	}
 	for _, opt := range opts {
 		opt(bot)
@@ -111,8 +130,73 @@ func (bot *Bot) CallMethod(
 			ResponseParams: r.Parameters,
 		}
 	}
-
+	if bot.debugRequests {
+		bot.log.Debug("call method", map[string]any{
+			"method": method,
+			"params": params,
+			"result": string(r.Result),
+		})
+	}
 	return r.Result, nil
+}
+
+type GetUpdatesChanConfig struct {
+	bufferSize        int
+	getUpdatesOptions *GetUpdatesOpts
+}
+type GetUpdatesChanOption func(*GetUpdatesChanConfig)
+
+func WithGetUpdatesChanBufferSize(bufferSize int) GetUpdatesChanOption {
+	return func(cfg *GetUpdatesChanConfig) {
+		cfg.bufferSize = bufferSize
+	}
+}
+
+func WithGetUpdatesOpts(getUpdatesOptions *GetUpdatesOpts) GetUpdatesChanOption {
+	return func(cfg *GetUpdatesChanConfig) {
+		cfg.getUpdatesOptions = getUpdatesOptions
+	}
+}
+
+// GetUpdatesChan starts and returns a channel for getting updates.
+func (bot *Bot) GetUpdatesChan(ctx context.Context, opts ...GetUpdatesChanOption) chan Update {
+	cfg := &GetUpdatesChanConfig{
+		bufferSize: 100,
+		getUpdatesOptions: &GetUpdatesOpts{
+			Timeout: 600,
+		},
+	}
+	for _, opt := range opts {
+		opt(cfg)
+	}
+	ch := make(chan Update, cfg.bufferSize)
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				close(ch)
+				return
+			default:
+			}
+
+			updates, err := bot.GetUpdates(ctx, cfg.getUpdatesOptions)
+			if err != nil {
+				bot.log.Error(err, "failed to get updates, retrying in 3 seconds...", nil)
+				time.Sleep(time.Second * 3)
+
+				continue
+			}
+
+			for _, update := range updates {
+				if update.UpdateID >= cfg.getUpdatesOptions.Offset {
+					cfg.getUpdatesOptions.Offset = update.UpdateID + 1
+					ch <- update
+				}
+			}
+		}
+	}()
+
+	return ch
 }
 
 func fillBuffer(b *bytes.Buffer, params map[string]string, data map[string]NamedReader) (string, error) {

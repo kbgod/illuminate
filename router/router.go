@@ -66,6 +66,14 @@ func (r *Router) GetRoutes() []*Route {
 	return r.routes
 }
 
+func (r *Router) addRoute(route *Route) {
+	if r.parent != nil {
+		r.parent.addRoute(route)
+	} else {
+		r.routes = append(r.routes, route)
+	}
+}
+
 func (r *Router) On(filter RouteFilter, handlers ...Handler) *Route {
 	var route *Route
 	if r.parent != nil {
@@ -77,12 +85,36 @@ func (r *Router) On(filter RouteFilter, handlers ...Handler) *Route {
 	return route
 }
 
-func (r *Router) addRoute(route *Route) {
-	if r.parent != nil {
-		r.parent.addRoute(route)
-	} else {
-		r.routes = append(r.routes, route)
-	}
+func (r *Router) OnUpdate(handlers ...Handler) *Route {
+	return r.On(AnyUpdate(), handlers...)
+}
+
+func (r *Router) OnMessage(handlers ...Handler) *Route {
+	return r.On(Message(), handlers...)
+}
+
+func (r *Router) OnCommand(command string, handlers ...Handler) *Route {
+	return r.On(Command(command), handlers...)
+}
+
+func (r *Router) OnStart(handlers ...Handler) *Route {
+	return r.On(Command("start"), handlers...)
+}
+
+func (r *Router) OnTextPrefix(prefix string, handlers ...Handler) *Route {
+	return r.On(TextPrefix(prefix), handlers...)
+}
+
+func (r *Router) OnTextContains(text string, handlers ...Handler) *Route {
+	return r.On(TextContains(text), handlers...)
+}
+
+func (r *Router) OnCommandWithAt(command, username string, handlers ...Handler) *Route {
+	return r.On(CommandWithAt(command, username), handlers...)
+}
+
+func (r *Router) OnCallbackPrefix(prefix string, handlers ...Handler) *Route {
+	return r.On(CallbackPrefix(prefix), handlers...)
 }
 
 func (r *Router) HandleUpdate(ctx context.Context, update *illuminate.Update) error {
