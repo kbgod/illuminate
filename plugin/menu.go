@@ -2,6 +2,10 @@ package plugin
 
 import "github.com/kbgod/illuminate"
 
+type IMenu interface {
+	Unwrap() illuminate.ReplyMarkup
+}
+
 type Menu struct {
 	illuminate.ReplyKeyboardMarkup
 	rowIndex int
@@ -26,6 +30,10 @@ func NewMenu(options ...MenuOption) *Menu {
 		option(menu)
 	}
 	return menu
+}
+
+func (m *Menu) Unwrap() illuminate.ReplyMarkup {
+	return m.ReplyKeyboardMarkup
 }
 
 func (m *Menu) Row(buttons ...illuminate.KeyboardButton) *Menu {
@@ -140,6 +148,10 @@ func NewInlineMenu() *InlineMenu {
 	}
 
 	return menu
+}
+
+func (m *InlineMenu) Unwrap() illuminate.ReplyMarkup {
+	return m.InlineKeyboardMarkup
 }
 
 func (m *InlineMenu) Row(buttons ...illuminate.InlineKeyboardButton) *InlineMenu {

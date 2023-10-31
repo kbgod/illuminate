@@ -3,6 +3,7 @@ package router
 import (
 	"context"
 	"github.com/kbgod/illuminate"
+	"github.com/kbgod/illuminate/plugin"
 	"strings"
 )
 
@@ -13,9 +14,10 @@ type Context struct {
 	indexRoute   int
 	indexHandler int
 
-	Context context.Context
-	Update  *illuminate.Update
-	Bot     *illuminate.Bot
+	parseMode *string
+	Context   context.Context
+	Update    *illuminate.Update
+	Bot       *illuminate.Bot
 }
 
 func newContext(ctx context.Context, router *Router, update *illuminate.Update) *Context {
@@ -27,6 +29,10 @@ func newContext(ctx context.Context, router *Router, update *illuminate.Update) 
 		router:       router,
 		Bot:          router.bot,
 	}
+}
+
+func (ctx *Context) SetParseMode(parseMode string) {
+	ctx.parseMode = &parseMode
 }
 
 func (ctx *Context) GetState() *string {
@@ -134,9 +140,42 @@ func (ctx *Context) CommandArgs() []string {
 // HELPER FUNCTIONS
 
 func (ctx *Context) Reply(text string, opts ...*illuminate.SendMessageOpts) (*illuminate.Message, error) {
+	if ctx.parseMode != nil {
+		if len(opts) == 0 {
+			opts = append(opts, &illuminate.SendMessageOpts{
+				ParseMode: *ctx.parseMode,
+			})
+		} else {
+			opts[0].ParseMode = *ctx.parseMode
+		}
+	}
 	var opt *illuminate.SendMessageOpts
 	if len(opts) > 0 {
 		opt = opts[0]
 	}
 	return ctx.Bot.SendMessage(ctx.Context, ctx.Update.Message.Chat.ID, text, opt)
+}
+
+func (ctx *Context) ReplyVoid(text string, opts ...*illuminate.SendMessageOpts) error {
+	_, err := ctx.Reply(text, opts...)
+	return err
+}
+
+func (ctx *Context) ReplyWithMenu(
+	text string, menu plugin.IMenu, opts ...*illuminate.SendMessageOpts,
+) (*illuminate.Message, error) {
+	if len(opts) == 0 {
+		opts = append(opts, &illuminate.SendMessageOpts{
+
+			ReplyMarkup: menu.Unwrap(),
+		})
+	}
+	return ctx.Reply(text, opts...)
+}
+
+func (ctx *Context) ReplyWithMenuVoid(
+	text string, menu plugin.IMenu, opts ...*illuminate.SendMessageOpts,
+) error {
+	_, err := ctx.ReplyWithMenu(text, menu, opts...)
+	return err
 }
