@@ -225,3 +225,12 @@ func (ctx *Context) AnswerAlertVoid(text string, opts ...*illuminate.AnswerCallb
 	_, err := ctx.AnswerAlert(text, opts...)
 	return err
 }
+
+// DeleteMessage deletes message which is in update
+func (ctx *Context) DeleteMessage(opts ...*illuminate.DeleteMessageOpts) (bool, error) {
+	var opt *illuminate.DeleteMessageOpts
+	if len(opts) > 0 {
+		opt = opts[0]
+	}
+	return ctx.Bot.DeleteMessage(ctx.Context, ctx.ChatID(), ctx.Message().MessageID, opt)
+}
