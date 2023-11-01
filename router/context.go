@@ -3,7 +3,6 @@ package router
 import (
 	"context"
 	"github.com/kbgod/illuminate"
-	"github.com/kbgod/illuminate/plugin"
 	"strings"
 )
 
@@ -165,7 +164,7 @@ func (ctx *Context) ReplyVoid(text string, opts ...*illuminate.SendMessageOpts) 
 
 // ReplyWithMenu sends message with menu
 func (ctx *Context) ReplyWithMenu(
-	text string, menu plugin.IMenu, opts ...*illuminate.SendMessageOpts,
+	text string, menu illuminate.Menu, opts ...*illuminate.SendMessageOpts,
 ) (*illuminate.Message, error) {
 	if len(opts) == 0 {
 		opts = append(opts, &illuminate.SendMessageOpts{
@@ -178,7 +177,7 @@ func (ctx *Context) ReplyWithMenu(
 
 // ReplyWithMenuVoid sends message with menu without returning result
 func (ctx *Context) ReplyWithMenuVoid(
-	text string, menu plugin.IMenu, opts ...*illuminate.SendMessageOpts,
+	text string, menu illuminate.Menu, opts ...*illuminate.SendMessageOpts,
 ) error {
 	_, err := ctx.ReplyWithMenu(text, menu, opts...)
 	return err

@@ -7,6 +7,10 @@ import (
 	"strconv"
 )
 
+type Menu interface {
+	Unwrap() ReplyMarkup
+}
+
 type PeerID interface {
 	PeerID() string
 }

@@ -2,10 +2,6 @@ package plugin
 
 import "github.com/kbgod/illuminate"
 
-type IMenu interface {
-	Unwrap() illuminate.ReplyMarkup
-}
-
 type Menu struct {
 	illuminate.ReplyKeyboardMarkup
 	rowIndex int
