@@ -234,3 +234,9 @@ func (ctx *Context) DeleteMessage(opts ...*illuminate.DeleteMessageOpts) (bool, 
 	}
 	return ctx.Bot.DeleteMessage(ctx.Context, ctx.ChatID(), ctx.Message().MessageID, opt)
 }
+
+// DeleteMessageVoid deletes message which is in update without returning result
+func DeleteMessageVoid(ctx *Context, opts ...*illuminate.DeleteMessageOpts) error {
+	_, err := ctx.DeleteMessage(opts...)
+	return err
+}
