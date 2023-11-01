@@ -122,11 +122,18 @@ func (bot *Bot) CallMethod(
 	}
 
 	if bot.debugRequests {
-		bot.log.Debug("call method", map[string]any{
+		fields := map[string]any{
 			"method": method,
 			"params": params,
-			"result": string(r.Result),
-		})
+		}
+		if !r.Ok {
+			fields["error_code"] = r.ErrorCode
+			fields["description"] = r.Description
+			fields["parameters"] = r.Parameters
+		} else {
+			fields["result"] = string(r.Result)
+		}
+		bot.log.Debug("call method", fields)
 	}
 	if !r.Ok {
 		return nil, &TelegramError{
