@@ -241,7 +241,9 @@ type ApproveChatJoinRequestOpts struct {
 //   - opts (type ApproveChatJoinRequestOpts): All optional parameters.
 func (bot *Bot) ApproveChatJoinRequest(ctx context.Context, chatID PeerID, userID int64, opts *ApproveChatJoinRequestOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["user_id"] = strconv.FormatInt(userID, 10)
 
 	r, err := bot.CallMethod(ctx, "approveChatJoinRequest", v, nil)
@@ -269,7 +271,9 @@ type BanChatMemberOpts struct {
 //   - opts (type BanChatMemberOpts): All optional parameters.
 func (bot *Bot) BanChatMember(ctx context.Context, chatID PeerID, userID int64, opts *BanChatMemberOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["user_id"] = strconv.FormatInt(userID, 10)
 	if opts != nil {
 		if opts.UntilDate != 0 {
@@ -299,7 +303,9 @@ type BanChatSenderChatOpts struct {
 //   - opts (type BanChatSenderChatOpts): All optional parameters.
 func (bot *Bot) BanChatSenderChat(ctx context.Context, chatID PeerID, senderChatID int64, opts *BanChatSenderChatOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["sender_chat_id"] = strconv.FormatInt(senderChatID, 10)
 
 	r, err := bot.CallMethod(ctx, "banChatSenderChat", v, nil)
@@ -343,7 +349,9 @@ type CloseForumTopicOpts struct {
 //   - opts (type CloseForumTopicOpts): All optional parameters.
 func (bot *Bot) CloseForumTopic(ctx context.Context, chatID PeerID, messageThreadID int64, opts *CloseForumTopicOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["message_thread_id"] = strconv.FormatInt(messageThreadID, 10)
 
 	r, err := bot.CallMethod(ctx, "closeForumTopic", v, nil)
@@ -366,7 +374,9 @@ type CloseGeneralForumTopicOpts struct {
 //   - opts (type CloseGeneralForumTopicOpts): All optional parameters.
 func (bot *Bot) CloseGeneralForumTopic(ctx context.Context, chatID PeerID, opts *CloseGeneralForumTopicOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 
 	r, err := bot.CallMethod(ctx, "closeGeneralForumTopic", v, nil)
 	if err != nil {
@@ -408,8 +418,12 @@ type CopyMessageOpts struct {
 //   - opts (type CopyMessageOpts): All optional parameters.
 func (bot *Bot) CopyMessage(ctx context.Context, chatID PeerID, fromChatID PeerID, messageID int64, opts *CopyMessageOpts) (*MessageId, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
-	v["from_chat_id"] = fromChatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
+	if fromChatID != nil {
+		v["from_chat_id"] = fromChatID.PeerID()
+	}
 	v["message_id"] = strconv.FormatInt(messageID, 10)
 	if opts != nil {
 		if opts.MessageThreadID != 0 {
@@ -469,7 +483,9 @@ type CreateChatInviteLinkOpts struct {
 //   - opts (type CreateChatInviteLinkOpts): All optional parameters.
 func (bot *Bot) CreateChatInviteLink(ctx context.Context, chatID PeerID, opts *CreateChatInviteLinkOpts) (*ChatInviteLink, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	if opts != nil {
 		v["name"] = opts.Name
 		if opts.ExpireDate != 0 {
@@ -506,7 +522,9 @@ type CreateForumTopicOpts struct {
 //   - opts (type CreateForumTopicOpts): All optional parameters.
 func (bot *Bot) CreateForumTopic(ctx context.Context, chatID PeerID, name string, opts *CreateForumTopicOpts) (*ForumTopic, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["name"] = name
 	if opts != nil {
 		if opts.IconColor != 0 {
@@ -685,7 +703,9 @@ type DeclineChatJoinRequestOpts struct {
 //   - opts (type DeclineChatJoinRequestOpts): All optional parameters.
 func (bot *Bot) DeclineChatJoinRequest(ctx context.Context, chatID PeerID, userID int64, opts *DeclineChatJoinRequestOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["user_id"] = strconv.FormatInt(userID, 10)
 
 	r, err := bot.CallMethod(ctx, "declineChatJoinRequest", v, nil)
@@ -708,7 +728,9 @@ type DeleteChatPhotoOpts struct {
 //   - opts (type DeleteChatPhotoOpts): All optional parameters.
 func (bot *Bot) DeleteChatPhoto(ctx context.Context, chatID PeerID, opts *DeleteChatPhotoOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 
 	r, err := bot.CallMethod(ctx, "deleteChatPhoto", v, nil)
 	if err != nil {
@@ -730,7 +752,9 @@ type DeleteChatStickerSetOpts struct {
 //   - opts (type DeleteChatStickerSetOpts): All optional parameters.
 func (bot *Bot) DeleteChatStickerSet(ctx context.Context, chatID PeerID, opts *DeleteChatStickerSetOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 
 	r, err := bot.CallMethod(ctx, "deleteChatStickerSet", v, nil)
 	if err != nil {
@@ -753,7 +777,9 @@ type DeleteForumTopicOpts struct {
 //   - opts (type DeleteForumTopicOpts): All optional parameters.
 func (bot *Bot) DeleteForumTopic(ctx context.Context, chatID PeerID, messageThreadID int64, opts *DeleteForumTopicOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["message_thread_id"] = strconv.FormatInt(messageThreadID, 10)
 
 	r, err := bot.CallMethod(ctx, "deleteForumTopic", v, nil)
@@ -787,7 +813,9 @@ type DeleteMessageOpts struct {
 //   - opts (type DeleteMessageOpts): All optional parameters.
 func (bot *Bot) DeleteMessage(ctx context.Context, chatID PeerID, messageID int64, opts *DeleteMessageOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["message_id"] = strconv.FormatInt(messageID, 10)
 
 	r, err := bot.CallMethod(ctx, "deleteMessage", v, nil)
@@ -920,7 +948,9 @@ type EditChatInviteLinkOpts struct {
 //   - opts (type EditChatInviteLinkOpts): All optional parameters.
 func (bot *Bot) EditChatInviteLink(ctx context.Context, chatID PeerID, inviteLink string, opts *EditChatInviteLinkOpts) (*ChatInviteLink, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["invite_link"] = inviteLink
 	if opts != nil {
 		v["name"] = opts.Name
@@ -958,7 +988,9 @@ type EditForumTopicOpts struct {
 //   - opts (type EditForumTopicOpts): All optional parameters.
 func (bot *Bot) EditForumTopic(ctx context.Context, chatID PeerID, messageThreadID int64, opts *EditForumTopicOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["message_thread_id"] = strconv.FormatInt(messageThreadID, 10)
 	if opts != nil {
 		v["name"] = opts.Name
@@ -988,7 +1020,9 @@ type EditGeneralForumTopicOpts struct {
 //   - opts (type EditGeneralForumTopicOpts): All optional parameters.
 func (bot *Bot) EditGeneralForumTopic(ctx context.Context, chatID PeerID, name string, opts *EditGeneralForumTopicOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["name"] = name
 
 	r, err := bot.CallMethod(ctx, "editGeneralForumTopic", v, nil)
@@ -1025,7 +1059,9 @@ type EditMessageCaptionOpts struct {
 func (bot *Bot) EditMessageCaption(ctx context.Context, opts *EditMessageCaptionOpts) (*Message, bool, error) {
 	v := map[string]string{}
 	if opts != nil {
-		v["chat_id"] = opts.ChatID.PeerID()
+		if opts.ChatID != nil {
+			v["chat_id"] = opts.ChatID.PeerID()
+		}
 		if opts.MessageID != 0 {
 			v["message_id"] = strconv.FormatInt(opts.MessageID, 10)
 		}
@@ -1092,7 +1128,9 @@ func (bot *Bot) EditMessageLiveLocation(ctx context.Context, latitude float64, l
 	v["latitude"] = strconv.FormatFloat(latitude, 'f', -1, 64)
 	v["longitude"] = strconv.FormatFloat(longitude, 'f', -1, 64)
 	if opts != nil {
-		v["chat_id"] = opts.ChatID.PeerID()
+		if opts.ChatID != nil {
+			v["chat_id"] = opts.ChatID.PeerID()
+		}
 		if opts.MessageID != 0 {
 			v["message_id"] = strconv.FormatInt(opts.MessageID, 10)
 		}
@@ -1156,7 +1194,9 @@ func (bot *Bot) EditMessageMedia(ctx context.Context, media InputMedia, opts *Ed
 	}
 	v["media"] = string(inputBs)
 	if opts != nil {
-		v["chat_id"] = opts.ChatID.PeerID()
+		if opts.ChatID != nil {
+			v["chat_id"] = opts.ChatID.PeerID()
+		}
 		if opts.MessageID != 0 {
 			v["message_id"] = strconv.FormatInt(opts.MessageID, 10)
 		}
@@ -1204,7 +1244,9 @@ type EditMessageReplyMarkupOpts struct {
 func (bot *Bot) EditMessageReplyMarkup(ctx context.Context, opts *EditMessageReplyMarkupOpts) (*Message, bool, error) {
 	v := map[string]string{}
 	if opts != nil {
-		v["chat_id"] = opts.ChatID.PeerID()
+		if opts.ChatID != nil {
+			v["chat_id"] = opts.ChatID.PeerID()
+		}
 		if opts.MessageID != 0 {
 			v["message_id"] = strconv.FormatInt(opts.MessageID, 10)
 		}
@@ -1260,7 +1302,9 @@ func (bot *Bot) EditMessageText(ctx context.Context, text string, opts *EditMess
 	v := map[string]string{}
 	v["text"] = text
 	if opts != nil {
-		v["chat_id"] = opts.ChatID.PeerID()
+		if opts.ChatID != nil {
+			v["chat_id"] = opts.ChatID.PeerID()
+		}
 		if opts.MessageID != 0 {
 			v["message_id"] = strconv.FormatInt(opts.MessageID, 10)
 		}
@@ -1309,7 +1353,9 @@ type ExportChatInviteLinkOpts struct {
 //   - opts (type ExportChatInviteLinkOpts): All optional parameters.
 func (bot *Bot) ExportChatInviteLink(ctx context.Context, chatID PeerID, opts *ExportChatInviteLinkOpts) (string, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 
 	r, err := bot.CallMethod(ctx, "exportChatInviteLink", v, nil)
 	if err != nil {
@@ -1339,8 +1385,12 @@ type ForwardMessageOpts struct {
 //   - opts (type ForwardMessageOpts): All optional parameters.
 func (bot *Bot) ForwardMessage(ctx context.Context, chatID PeerID, fromChatID PeerID, messageID int64, opts *ForwardMessageOpts) (*Message, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
-	v["from_chat_id"] = fromChatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
+	if fromChatID != nil {
+		v["from_chat_id"] = fromChatID.PeerID()
+	}
 	v["message_id"] = strconv.FormatInt(messageID, 10)
 	if opts != nil {
 		if opts.MessageThreadID != 0 {
@@ -1370,7 +1420,9 @@ type GetChatOpts struct {
 //   - opts (type GetChatOpts): All optional parameters.
 func (bot *Bot) GetChat(ctx context.Context, chatID PeerID, opts *GetChatOpts) (*Chat, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 
 	r, err := bot.CallMethod(ctx, "getChat", v, nil)
 	if err != nil {
@@ -1392,7 +1444,9 @@ type GetChatAdministratorsOpts struct {
 //   - opts (type GetChatAdministratorsOpts): All optional parameters.
 func (bot *Bot) GetChatAdministrators(ctx context.Context, chatID PeerID, opts *GetChatAdministratorsOpts) ([]ChatMember, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 
 	r, err := bot.CallMethod(ctx, "getChatAdministrators", v, nil)
 	if err != nil {
@@ -1414,7 +1468,9 @@ type GetChatMemberOpts struct {
 //   - opts (type GetChatMemberOpts): All optional parameters.
 func (bot *Bot) GetChatMember(ctx context.Context, chatID PeerID, userID int64, opts *GetChatMemberOpts) (ChatMember, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["user_id"] = strconv.FormatInt(userID, 10)
 
 	r, err := bot.CallMethod(ctx, "getChatMember", v, nil)
@@ -1436,7 +1492,9 @@ type GetChatMemberCountOpts struct {
 //   - opts (type GetChatMemberCountOpts): All optional parameters.
 func (bot *Bot) GetChatMemberCount(ctx context.Context, chatID PeerID, opts *GetChatMemberCountOpts) (int64, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 
 	r, err := bot.CallMethod(ctx, "getChatMemberCount", v, nil)
 	if err != nil {
@@ -1866,7 +1924,9 @@ type HideGeneralForumTopicOpts struct {
 //   - opts (type HideGeneralForumTopicOpts): All optional parameters.
 func (bot *Bot) HideGeneralForumTopic(ctx context.Context, chatID PeerID, opts *HideGeneralForumTopicOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 
 	r, err := bot.CallMethod(ctx, "hideGeneralForumTopic", v, nil)
 	if err != nil {
@@ -1888,7 +1948,9 @@ type LeaveChatOpts struct {
 //   - opts (type LeaveChatOpts): All optional parameters.
 func (bot *Bot) LeaveChat(ctx context.Context, chatID PeerID, opts *LeaveChatOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 
 	r, err := bot.CallMethod(ctx, "leaveChat", v, nil)
 	if err != nil {
@@ -1933,7 +1995,9 @@ type PinChatMessageOpts struct {
 //   - opts (type PinChatMessageOpts): All optional parameters.
 func (bot *Bot) PinChatMessage(ctx context.Context, chatID PeerID, messageID int64, opts *PinChatMessageOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["message_id"] = strconv.FormatInt(messageID, 10)
 	if opts != nil {
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
@@ -1990,7 +2054,9 @@ type PromoteChatMemberOpts struct {
 //   - opts (type PromoteChatMemberOpts): All optional parameters.
 func (bot *Bot) PromoteChatMember(ctx context.Context, chatID PeerID, userID int64, opts *PromoteChatMemberOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["user_id"] = strconv.FormatInt(userID, 10)
 	if opts != nil {
 		v["is_anonymous"] = strconv.FormatBool(opts.IsAnonymous)
@@ -2031,7 +2097,9 @@ type ReopenForumTopicOpts struct {
 //   - opts (type ReopenForumTopicOpts): All optional parameters.
 func (bot *Bot) ReopenForumTopic(ctx context.Context, chatID PeerID, messageThreadID int64, opts *ReopenForumTopicOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["message_thread_id"] = strconv.FormatInt(messageThreadID, 10)
 
 	r, err := bot.CallMethod(ctx, "reopenForumTopic", v, nil)
@@ -2054,7 +2122,9 @@ type ReopenGeneralForumTopicOpts struct {
 //   - opts (type ReopenGeneralForumTopicOpts): All optional parameters.
 func (bot *Bot) ReopenGeneralForumTopic(ctx context.Context, chatID PeerID, opts *ReopenGeneralForumTopicOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 
 	r, err := bot.CallMethod(ctx, "reopenGeneralForumTopic", v, nil)
 	if err != nil {
@@ -2082,7 +2152,9 @@ type RestrictChatMemberOpts struct {
 //   - opts (type RestrictChatMemberOpts): All optional parameters.
 func (bot *Bot) RestrictChatMember(ctx context.Context, chatID PeerID, userID int64, permissions ChatPermissions, opts *RestrictChatMemberOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["user_id"] = strconv.FormatInt(userID, 10)
 	bs, err := json.Marshal(permissions)
 	if err != nil {
@@ -2117,7 +2189,9 @@ type RevokeChatInviteLinkOpts struct {
 //   - opts (type RevokeChatInviteLinkOpts): All optional parameters.
 func (bot *Bot) RevokeChatInviteLink(ctx context.Context, chatID PeerID, inviteLink string, opts *RevokeChatInviteLinkOpts) (*ChatInviteLink, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["invite_link"] = inviteLink
 
 	r, err := bot.CallMethod(ctx, "revokeChatInviteLink", v, nil)
@@ -2170,7 +2244,9 @@ type SendAnimationOpts struct {
 func (bot *Bot) SendAnimation(ctx context.Context, chatID PeerID, animation InputFile, opts *SendAnimationOpts) (*Message, error) {
 	v := map[string]string{}
 	data := map[string]NamedReader{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	if animation != nil {
 		switch m := animation.(type) {
 		case string:
@@ -2300,7 +2376,9 @@ type SendAudioOpts struct {
 func (bot *Bot) SendAudio(ctx context.Context, chatID PeerID, audio InputFile, opts *SendAudioOpts) (*Message, error) {
 	v := map[string]string{}
 	data := map[string]NamedReader{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	if audio != nil {
 		switch m := audio.(type) {
 		case string:
@@ -2400,7 +2478,9 @@ type SendChatActionOpts struct {
 //   - opts (type SendChatActionOpts): All optional parameters.
 func (bot *Bot) SendChatAction(ctx context.Context, chatID PeerID, action string, opts *SendChatActionOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["action"] = action
 	if opts != nil {
 		if opts.MessageThreadID != 0 {
@@ -2446,7 +2526,9 @@ type SendContactOpts struct {
 //   - opts (type SendContactOpts): All optional parameters.
 func (bot *Bot) SendContact(ctx context.Context, chatID PeerID, phoneNumber string, firstName string, opts *SendContactOpts) (*Message, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["phone_number"] = phoneNumber
 	v["first_name"] = firstName
 	if opts != nil {
@@ -2504,7 +2586,9 @@ type SendDiceOpts struct {
 //   - opts (type SendDiceOpts): All optional parameters.
 func (bot *Bot) SendDice(ctx context.Context, chatID PeerID, opts *SendDiceOpts) (*Message, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	if opts != nil {
 		if opts.MessageThreadID != 0 {
 			v["message_thread_id"] = strconv.FormatInt(opts.MessageThreadID, 10)
@@ -2569,7 +2653,9 @@ type SendDocumentOpts struct {
 func (bot *Bot) SendDocument(ctx context.Context, chatID PeerID, document InputFile, opts *SendDocumentOpts) (*Message, error) {
 	v := map[string]string{}
 	data := map[string]NamedReader{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	if document != nil {
 		switch m := document.(type) {
 		case string:
@@ -2761,7 +2847,9 @@ type SendInvoiceOpts struct {
 //   - opts (type SendInvoiceOpts): All optional parameters.
 func (bot *Bot) SendInvoice(ctx context.Context, chatID PeerID, title string, description string, payload string, providerToken string, currency string, prices []LabeledPrice, opts *SendInvoiceOpts) (*Message, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["title"] = title
 	v["description"] = description
 	v["payload"] = payload
@@ -2862,7 +2950,9 @@ type SendLocationOpts struct {
 //   - opts (type SendLocationOpts): All optional parameters.
 func (bot *Bot) SendLocation(ctx context.Context, chatID PeerID, latitude float64, longitude float64, opts *SendLocationOpts) (*Message, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["latitude"] = strconv.FormatFloat(latitude, 'f', -1, 64)
 	v["longitude"] = strconv.FormatFloat(longitude, 'f', -1, 64)
 	if opts != nil {
@@ -2928,7 +3018,9 @@ type SendMediaGroupOpts struct {
 func (bot *Bot) SendMediaGroup(ctx context.Context, chatID PeerID, media []InputMedia, opts *SendMediaGroupOpts) ([]Message, error) {
 	v := map[string]string{}
 	data := map[string]NamedReader{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	if media != nil {
 		var rawList []json.RawMessage
 		for idx, im := range media {
@@ -2995,7 +3087,9 @@ type SendMessageOpts struct {
 //   - opts (type SendMessageOpts): All optional parameters.
 func (bot *Bot) SendMessage(ctx context.Context, chatID PeerID, text string, opts *SendMessageOpts) (*Message, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["text"] = text
 	if opts != nil {
 		if opts.MessageThreadID != 0 {
@@ -3067,7 +3161,9 @@ type SendPhotoOpts struct {
 func (bot *Bot) SendPhoto(ctx context.Context, chatID PeerID, photo InputFile, opts *SendPhotoOpts) (*Message, error) {
 	v := map[string]string{}
 	data := map[string]NamedReader{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	if photo != nil {
 		switch m := photo.(type) {
 		case string:
@@ -3172,7 +3268,9 @@ type SendPollOpts struct {
 //   - opts (type SendPollOpts): All optional parameters.
 func (bot *Bot) SendPoll(ctx context.Context, chatID PeerID, question string, options []string, opts *SendPollOpts) (*Message, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["question"] = question
 	if options != nil {
 		bs, err := json.Marshal(options)
@@ -3259,7 +3357,9 @@ type SendStickerOpts struct {
 func (bot *Bot) SendSticker(ctx context.Context, chatID PeerID, sticker InputFile, opts *SendStickerOpts) (*Message, error) {
 	v := map[string]string{}
 	data := map[string]NamedReader{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	if sticker != nil {
 		switch m := sticker.(type) {
 		case string:
@@ -3345,7 +3445,9 @@ type SendVenueOpts struct {
 //   - opts (type SendVenueOpts): All optional parameters.
 func (bot *Bot) SendVenue(ctx context.Context, chatID PeerID, latitude float64, longitude float64, title string, address string, opts *SendVenueOpts) (*Message, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["latitude"] = strconv.FormatFloat(latitude, 'f', -1, 64)
 	v["longitude"] = strconv.FormatFloat(longitude, 'f', -1, 64)
 	v["title"] = title
@@ -3425,7 +3527,9 @@ type SendVideoOpts struct {
 func (bot *Bot) SendVideo(ctx context.Context, chatID PeerID, video InputFile, opts *SendVideoOpts) (*Message, error) {
 	v := map[string]string{}
 	data := map[string]NamedReader{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	if video != nil {
 		switch m := video.(type) {
 		case string:
@@ -3547,7 +3651,9 @@ type SendVideoNoteOpts struct {
 func (bot *Bot) SendVideoNote(ctx context.Context, chatID PeerID, videoNote InputFile, opts *SendVideoNoteOpts) (*Message, error) {
 	v := map[string]string{}
 	data := map[string]NamedReader{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	if videoNote != nil {
 		switch m := videoNote.(type) {
 		case string:
@@ -3657,7 +3763,9 @@ type SendVoiceOpts struct {
 func (bot *Bot) SendVoice(ctx context.Context, chatID PeerID, voice InputFile, opts *SendVoiceOpts) (*Message, error) {
 	v := map[string]string{}
 	data := map[string]NamedReader{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	if voice != nil {
 		switch m := voice.(type) {
 		case string:
@@ -3732,7 +3840,9 @@ type SetChatAdministratorCustomTitleOpts struct {
 //   - opts (type SetChatAdministratorCustomTitleOpts): All optional parameters.
 func (bot *Bot) SetChatAdministratorCustomTitle(ctx context.Context, chatID PeerID, userID int64, customTitle string, opts *SetChatAdministratorCustomTitleOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["user_id"] = strconv.FormatInt(userID, 10)
 	v["custom_title"] = customTitle
 
@@ -3758,7 +3868,9 @@ type SetChatDescriptionOpts struct {
 //   - opts (type SetChatDescriptionOpts): All optional parameters.
 func (bot *Bot) SetChatDescription(ctx context.Context, chatID PeerID, opts *SetChatDescriptionOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	if opts != nil {
 		v["description"] = opts.Description
 	}
@@ -3820,7 +3932,9 @@ type SetChatPermissionsOpts struct {
 //   - opts (type SetChatPermissionsOpts): All optional parameters.
 func (bot *Bot) SetChatPermissions(ctx context.Context, chatID PeerID, permissions ChatPermissions, opts *SetChatPermissionsOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	bs, err := json.Marshal(permissions)
 	if err != nil {
 		return false, fmt.Errorf("failed to marshal field permissions: %w", err)
@@ -3852,7 +3966,9 @@ type SetChatPhotoOpts struct {
 func (bot *Bot) SetChatPhoto(ctx context.Context, chatID PeerID, photo InputFile, opts *SetChatPhotoOpts) (bool, error) {
 	v := map[string]string{}
 	data := map[string]NamedReader{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	if photo != nil {
 		switch m := photo.(type) {
 		case NamedReader:
@@ -3893,7 +4009,9 @@ type SetChatStickerSetOpts struct {
 //   - opts (type SetChatStickerSetOpts): All optional parameters.
 func (bot *Bot) SetChatStickerSet(ctx context.Context, chatID PeerID, stickerSetName string, opts *SetChatStickerSetOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["sticker_set_name"] = stickerSetName
 
 	r, err := bot.CallMethod(ctx, "setChatStickerSet", v, nil)
@@ -3917,7 +4035,9 @@ type SetChatTitleOpts struct {
 //   - opts (type SetChatTitleOpts): All optional parameters.
 func (bot *Bot) SetChatTitle(ctx context.Context, chatID PeerID, title string, opts *SetChatTitleOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["title"] = title
 
 	r, err := bot.CallMethod(ctx, "setChatTitle", v, nil)
@@ -4480,7 +4600,9 @@ type StopMessageLiveLocationOpts struct {
 func (bot *Bot) StopMessageLiveLocation(ctx context.Context, opts *StopMessageLiveLocationOpts) (*Message, bool, error) {
 	v := map[string]string{}
 	if opts != nil {
-		v["chat_id"] = opts.ChatID.PeerID()
+		if opts.ChatID != nil {
+			v["chat_id"] = opts.ChatID.PeerID()
+		}
 		if opts.MessageID != 0 {
 			v["message_id"] = strconv.FormatInt(opts.MessageID, 10)
 		}
@@ -4523,7 +4645,9 @@ type StopPollOpts struct {
 //   - opts (type StopPollOpts): All optional parameters.
 func (bot *Bot) StopPoll(ctx context.Context, chatID PeerID, messageID int64, opts *StopPollOpts) (*Poll, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["message_id"] = strconv.FormatInt(messageID, 10)
 	if opts != nil {
 		bs, err := json.Marshal(opts.ReplyMarkup)
@@ -4556,7 +4680,9 @@ type UnbanChatMemberOpts struct {
 //   - opts (type UnbanChatMemberOpts): All optional parameters.
 func (bot *Bot) UnbanChatMember(ctx context.Context, chatID PeerID, userID int64, opts *UnbanChatMemberOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["user_id"] = strconv.FormatInt(userID, 10)
 	if opts != nil {
 		v["only_if_banned"] = strconv.FormatBool(opts.OnlyIfBanned)
@@ -4583,7 +4709,9 @@ type UnbanChatSenderChatOpts struct {
 //   - opts (type UnbanChatSenderChatOpts): All optional parameters.
 func (bot *Bot) UnbanChatSenderChat(ctx context.Context, chatID PeerID, senderChatID int64, opts *UnbanChatSenderChatOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["sender_chat_id"] = strconv.FormatInt(senderChatID, 10)
 
 	r, err := bot.CallMethod(ctx, "unbanChatSenderChat", v, nil)
@@ -4606,7 +4734,9 @@ type UnhideGeneralForumTopicOpts struct {
 //   - opts (type UnhideGeneralForumTopicOpts): All optional parameters.
 func (bot *Bot) UnhideGeneralForumTopic(ctx context.Context, chatID PeerID, opts *UnhideGeneralForumTopicOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 
 	r, err := bot.CallMethod(ctx, "unhideGeneralForumTopic", v, nil)
 	if err != nil {
@@ -4628,7 +4758,9 @@ type UnpinAllChatMessagesOpts struct {
 //   - opts (type UnpinAllChatMessagesOpts): All optional parameters.
 func (bot *Bot) UnpinAllChatMessages(ctx context.Context, chatID PeerID, opts *UnpinAllChatMessagesOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 
 	r, err := bot.CallMethod(ctx, "unpinAllChatMessages", v, nil)
 	if err != nil {
@@ -4651,7 +4783,9 @@ type UnpinAllForumTopicMessagesOpts struct {
 //   - opts (type UnpinAllForumTopicMessagesOpts): All optional parameters.
 func (bot *Bot) UnpinAllForumTopicMessages(ctx context.Context, chatID PeerID, messageThreadID int64, opts *UnpinAllForumTopicMessagesOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	v["message_thread_id"] = strconv.FormatInt(messageThreadID, 10)
 
 	r, err := bot.CallMethod(ctx, "unpinAllForumTopicMessages", v, nil)
@@ -4674,7 +4808,9 @@ type UnpinAllGeneralForumTopicMessagesOpts struct {
 //   - opts (type UnpinAllGeneralForumTopicMessagesOpts): All optional parameters.
 func (bot *Bot) UnpinAllGeneralForumTopicMessages(ctx context.Context, chatID PeerID, opts *UnpinAllGeneralForumTopicMessagesOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 
 	r, err := bot.CallMethod(ctx, "unpinAllGeneralForumTopicMessages", v, nil)
 	if err != nil {
@@ -4698,7 +4834,9 @@ type UnpinChatMessageOpts struct {
 //   - opts (type UnpinChatMessageOpts): All optional parameters.
 func (bot *Bot) UnpinChatMessage(ctx context.Context, chatID PeerID, opts *UnpinChatMessageOpts) (bool, error) {
 	v := map[string]string{}
-	v["chat_id"] = chatID.PeerID()
+	if chatID != nil {
+		v["chat_id"] = chatID.PeerID()
+	}
 	if opts != nil {
 		if opts.MessageID != nil {
 			v["message_id"] = strconv.FormatInt(*opts.MessageID, 10)
