@@ -121,6 +121,13 @@ func (bot *Bot) CallMethod(
 		)
 	}
 
+	if bot.debugRequests {
+		bot.log.Debug("call method", map[string]any{
+			"method": method,
+			"params": params,
+			"result": string(r.Result),
+		})
+	}
 	if !r.Ok {
 		return nil, &TelegramError{
 			Method:         method,
@@ -129,13 +136,6 @@ func (bot *Bot) CallMethod(
 			Description:    r.Description,
 			ResponseParams: r.Parameters,
 		}
-	}
-	if bot.debugRequests {
-		bot.log.Debug("call method", map[string]any{
-			"method": method,
-			"params": params,
-			"result": string(r.Result),
-		})
 	}
 	return r.Result, nil
 }
