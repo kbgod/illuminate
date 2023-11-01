@@ -139,6 +139,7 @@ func (ctx *Context) CommandArgs() []string {
 
 // HELPER FUNCTIONS
 
+// Reply sends message to the chat from update
 func (ctx *Context) Reply(text string, opts ...*illuminate.SendMessageOpts) (*illuminate.Message, error) {
 	if ctx.parseMode != nil {
 		if len(opts) == 0 {
@@ -153,14 +154,16 @@ func (ctx *Context) Reply(text string, opts ...*illuminate.SendMessageOpts) (*il
 	if len(opts) > 0 {
 		opt = opts[0]
 	}
-	return ctx.Bot.SendMessage(ctx.Context, ctx.Update.Message.Chat.ID, text, opt)
+	return ctx.Bot.SendMessage(ctx.Context, ctx.ChatID(), text, opt)
 }
 
+// ReplyVoid sends message without returning result
 func (ctx *Context) ReplyVoid(text string, opts ...*illuminate.SendMessageOpts) error {
 	_, err := ctx.Reply(text, opts...)
 	return err
 }
 
+// ReplyWithMenu sends message with menu
 func (ctx *Context) ReplyWithMenu(
 	text string, menu plugin.IMenu, opts ...*illuminate.SendMessageOpts,
 ) (*illuminate.Message, error) {
@@ -173,9 +176,52 @@ func (ctx *Context) ReplyWithMenu(
 	return ctx.Reply(text, opts...)
 }
 
+// ReplyWithMenuVoid sends message with menu without returning result
 func (ctx *Context) ReplyWithMenuVoid(
 	text string, menu plugin.IMenu, opts ...*illuminate.SendMessageOpts,
 ) error {
 	_, err := ctx.ReplyWithMenu(text, menu, opts...)
+	return err
+}
+
+// Answer sends answer to callback query from update
+func (ctx *Context) Answer(text string, opts ...*illuminate.AnswerCallbackQueryOpts) (bool, error) {
+	if text != "" {
+		if len(opts) == 0 {
+			opts = append(opts, &illuminate.AnswerCallbackQueryOpts{
+				Text: text,
+			})
+		} else {
+			opts[0].Text = text
+		}
+	}
+	var opt *illuminate.AnswerCallbackQueryOpts
+	if len(opts) > 0 {
+		opt = opts[0]
+	}
+	return ctx.Bot.AnswerCallbackQuery(ctx.Context, ctx.Update.CallbackQuery.ID, opt)
+}
+
+// AnswerVoid sends answer to callback query without returning result
+func (ctx *Context) AnswerVoid(text string, opts ...*illuminate.AnswerCallbackQueryOpts) error {
+	_, err := ctx.Answer(text, opts...)
+	return err
+}
+
+// AnswerAlert sends answer to callback query from update with alert
+func (ctx *Context) AnswerAlert(text string, opts ...*illuminate.AnswerCallbackQueryOpts) (bool, error) {
+	if len(opts) == 0 {
+		opts = append(opts, &illuminate.AnswerCallbackQueryOpts{
+			ShowAlert: true,
+		})
+	} else {
+		opts[0].ShowAlert = true
+	}
+	return ctx.Answer(text, opts...)
+}
+
+// AnswerAlertVoid sends answer to callback query with alert without returning result
+func (ctx *Context) AnswerAlertVoid(text string, opts ...*illuminate.AnswerCallbackQueryOpts) error {
+	_, err := ctx.AnswerAlert(text, opts...)
 	return err
 }
