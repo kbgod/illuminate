@@ -237,7 +237,7 @@ func TestMenu_RequestChatBtn(t *testing.T) {
 
 func TestMenu_RequestUserBtn(t *testing.T) {
 	menu := NewMenu()
-	menu.RequestUserBtn("test", &KeyboardButtonRequestUser{})
+	menu.RequestUserBtn("test", &KeyboardButtonRequestUsers{})
 	if len(menu.Keyboard) != 1 {
 		t.Error("Menu.RequestUserBtn failed")
 	}
@@ -247,7 +247,7 @@ func TestMenu_RequestUserBtn(t *testing.T) {
 	if menu.Keyboard[0][0].Text != "test" {
 		t.Error("Menu.RequestUserBtn failed")
 	}
-	if menu.Keyboard[0][0].RequestUser == nil {
+	if menu.Keyboard[0][0].RequestUsers == nil {
 		t.Error("Menu.RequestUserBtn failed")
 	}
 }
