@@ -1,9 +1,7 @@
-package plugin
-
-import "github.com/kbgod/illuminate"
+package illuminate
 
 type Menu struct {
-	illuminate.ReplyKeyboardMarkup
+	ReplyKeyboardMarkup
 	rowIndex int
 }
 
@@ -17,9 +15,9 @@ type MenuOption func(*Menu)
 
 func NewMenu(options ...MenuOption) *Menu {
 	menu := &Menu{
-		ReplyKeyboardMarkup: illuminate.ReplyKeyboardMarkup{
+		ReplyKeyboardMarkup: ReplyKeyboardMarkup{
 			ResizeKeyboard: true,
-			Keyboard:       make([][]illuminate.KeyboardButton, 1),
+			Keyboard:       make([][]KeyboardButton, 1),
 		},
 	}
 	for _, option := range options {
@@ -28,11 +26,11 @@ func NewMenu(options ...MenuOption) *Menu {
 	return menu
 }
 
-func (m *Menu) Unwrap() illuminate.ReplyMarkup {
+func (m *Menu) Unwrap() ReplyMarkup {
 	return m.ReplyKeyboardMarkup
 }
 
-func (m *Menu) Row(buttons ...illuminate.KeyboardButton) *Menu {
+func (m *Menu) Row(buttons ...KeyboardButton) *Menu {
 	if len(m.Keyboard[m.rowIndex]) == 0 {
 		m.Keyboard[m.rowIndex] = buttons
 	} else {
@@ -44,9 +42,9 @@ func (m *Menu) Row(buttons ...illuminate.KeyboardButton) *Menu {
 }
 
 func (m *Menu) TextRow(buttons ...string) *Menu {
-	keyboardButtons := make([]illuminate.KeyboardButton, 0, len(buttons))
+	keyboardButtons := make([]KeyboardButton, 0, len(buttons))
 	for _, button := range buttons {
-		keyboardButtons = append(keyboardButtons, illuminate.KeyboardButton{
+		keyboardButtons = append(keyboardButtons, KeyboardButton{
 			Text: button,
 		})
 	}
@@ -55,7 +53,7 @@ func (m *Menu) TextRow(buttons ...string) *Menu {
 	return m
 }
 
-func (m *Menu) Fill(perLine int, buttons ...illuminate.KeyboardButton) *Menu {
+func (m *Menu) Fill(perLine int, buttons ...KeyboardButton) *Menu {
 	for i := 0; i < len(buttons); i += perLine {
 		end := i + perLine
 		if end > len(buttons) {
@@ -67,9 +65,9 @@ func (m *Menu) Fill(perLine int, buttons ...illuminate.KeyboardButton) *Menu {
 }
 
 func (m *Menu) TextFill(perLine int, buttons ...string) *Menu {
-	keyboardButtons := make([]illuminate.KeyboardButton, 0, len(buttons))
+	keyboardButtons := make([]KeyboardButton, 0, len(buttons))
 	for _, button := range buttons {
-		keyboardButtons = append(keyboardButtons, illuminate.KeyboardButton{
+		keyboardButtons = append(keyboardButtons, KeyboardButton{
 			Text: button,
 		})
 	}
@@ -77,20 +75,20 @@ func (m *Menu) TextFill(perLine int, buttons ...string) *Menu {
 	return m
 }
 
-func (m *Menu) Btn(btn illuminate.KeyboardButton) *Menu {
+func (m *Menu) Btn(btn KeyboardButton) *Menu {
 	m.Keyboard[m.rowIndex] = append(m.Keyboard[m.rowIndex], btn)
 	return m
 }
 
 func (m *Menu) TextBtn(text string) *Menu {
-	m.Keyboard[m.rowIndex] = append(m.Keyboard[m.rowIndex], illuminate.KeyboardButton{
+	m.Keyboard[m.rowIndex] = append(m.Keyboard[m.rowIndex], KeyboardButton{
 		Text: text,
 	})
 	return m
 }
 
 func (m *Menu) ContactBtn(text string) *Menu {
-	m.Keyboard[m.rowIndex] = append(m.Keyboard[m.rowIndex], illuminate.KeyboardButton{
+	m.Keyboard[m.rowIndex] = append(m.Keyboard[m.rowIndex], KeyboardButton{
 		Text:           text,
 		RequestContact: true,
 	})
@@ -98,7 +96,7 @@ func (m *Menu) ContactBtn(text string) *Menu {
 }
 
 func (m *Menu) LocationBtn(text string) *Menu {
-	m.Keyboard[m.rowIndex] = append(m.Keyboard[m.rowIndex], illuminate.KeyboardButton{
+	m.Keyboard[m.rowIndex] = append(m.Keyboard[m.rowIndex], KeyboardButton{
 		Text:            text,
 		RequestLocation: true,
 	})
@@ -106,51 +104,51 @@ func (m *Menu) LocationBtn(text string) *Menu {
 }
 
 func (m *Menu) WebAppBtn(text, url string) *Menu {
-	m.Keyboard[m.rowIndex] = append(m.Keyboard[m.rowIndex], illuminate.KeyboardButton{
+	m.Keyboard[m.rowIndex] = append(m.Keyboard[m.rowIndex], KeyboardButton{
 		Text: text,
-		WebApp: &illuminate.WebAppInfo{
+		WebApp: &WebAppInfo{
 			Url: url,
 		},
 	})
 	return m
 }
 
-func (m *Menu) RequestChatBtn(text string, req *illuminate.KeyboardButtonRequestChat) *Menu {
-	m.Keyboard[m.rowIndex] = append(m.Keyboard[m.rowIndex], illuminate.KeyboardButton{
+func (m *Menu) RequestChatBtn(text string, req *KeyboardButtonRequestChat) *Menu {
+	m.Keyboard[m.rowIndex] = append(m.Keyboard[m.rowIndex], KeyboardButton{
 		Text:        text,
 		RequestChat: req,
 	})
 	return m
 }
 
-func (m *Menu) RequestUserBtn(text string, req *illuminate.KeyboardButtonRequestUser) *Menu {
-	m.Keyboard[m.rowIndex] = append(m.Keyboard[m.rowIndex], illuminate.KeyboardButton{
-		Text:        text,
-		RequestUser: req,
+func (m *Menu) RequestUserBtn(text string, req *KeyboardButtonRequestUsers) *Menu {
+	m.Keyboard[m.rowIndex] = append(m.Keyboard[m.rowIndex], KeyboardButton{
+		Text:         text,
+		RequestUsers: req,
 	})
 	return m
 }
 
 type InlineMenu struct {
-	illuminate.InlineKeyboardMarkup
+	InlineKeyboardMarkup
 	rowIndex int
 }
 
 func NewInlineMenu() *InlineMenu {
 	menu := &InlineMenu{
-		InlineKeyboardMarkup: illuminate.InlineKeyboardMarkup{
-			InlineKeyboard: make([][]illuminate.InlineKeyboardButton, 1),
+		InlineKeyboardMarkup: InlineKeyboardMarkup{
+			InlineKeyboard: make([][]InlineKeyboardButton, 1),
 		},
 	}
 
 	return menu
 }
 
-func (m *InlineMenu) Unwrap() illuminate.ReplyMarkup {
+func (m *InlineMenu) Unwrap() ReplyMarkup {
 	return m.InlineKeyboardMarkup
 }
 
-func (m *InlineMenu) Row(buttons ...illuminate.InlineKeyboardButton) *InlineMenu {
+func (m *InlineMenu) Row(buttons ...InlineKeyboardButton) *InlineMenu {
 	if len(m.InlineKeyboard[m.rowIndex]) == 0 {
 		m.InlineKeyboard[m.rowIndex] = buttons
 	} else {
@@ -161,7 +159,7 @@ func (m *InlineMenu) Row(buttons ...illuminate.InlineKeyboardButton) *InlineMenu
 	return m
 }
 
-func (m *InlineMenu) Fill(perLine int, buttons ...illuminate.InlineKeyboardButton) *InlineMenu {
+func (m *InlineMenu) Fill(perLine int, buttons ...InlineKeyboardButton) *InlineMenu {
 	for i := 0; i < len(buttons); i += perLine {
 		end := i + perLine
 		if end > len(buttons) {
@@ -172,13 +170,13 @@ func (m *InlineMenu) Fill(perLine int, buttons ...illuminate.InlineKeyboardButto
 	return m
 }
 
-func (m *InlineMenu) Btn(btn illuminate.InlineKeyboardButton) *InlineMenu {
+func (m *InlineMenu) Btn(btn InlineKeyboardButton) *InlineMenu {
 	m.InlineKeyboard[m.rowIndex] = append(m.InlineKeyboard[m.rowIndex], btn)
 	return m
 }
 
 func (m *InlineMenu) CallbackBtn(text, data string) *InlineMenu {
-	m.InlineKeyboard[m.rowIndex] = append(m.InlineKeyboard[m.rowIndex], illuminate.InlineKeyboardButton{
+	m.InlineKeyboard[m.rowIndex] = append(m.InlineKeyboard[m.rowIndex], InlineKeyboardButton{
 		Text:         text,
 		CallbackData: data,
 	})
@@ -186,7 +184,7 @@ func (m *InlineMenu) CallbackBtn(text, data string) *InlineMenu {
 }
 
 func (m *InlineMenu) URLBtn(text, url string) *InlineMenu {
-	m.InlineKeyboard[m.rowIndex] = append(m.InlineKeyboard[m.rowIndex], illuminate.InlineKeyboardButton{
+	m.InlineKeyboard[m.rowIndex] = append(m.InlineKeyboard[m.rowIndex], InlineKeyboardButton{
 		Text: text,
 		Url:  url,
 	})
@@ -194,9 +192,9 @@ func (m *InlineMenu) URLBtn(text, url string) *InlineMenu {
 }
 
 func (m *InlineMenu) LoginBtn(text, loginURL string) *InlineMenu {
-	m.InlineKeyboard[m.rowIndex] = append(m.InlineKeyboard[m.rowIndex], illuminate.InlineKeyboardButton{
+	m.InlineKeyboard[m.rowIndex] = append(m.InlineKeyboard[m.rowIndex], InlineKeyboardButton{
 		Text: text,
-		LoginUrl: &illuminate.LoginUrl{
+		LoginUrl: &LoginUrl{
 			Url: loginURL,
 		},
 	})
@@ -204,7 +202,7 @@ func (m *InlineMenu) LoginBtn(text, loginURL string) *InlineMenu {
 }
 
 func (m *InlineMenu) SwitchInlineQueryBtn(text, query string) *InlineMenu {
-	m.InlineKeyboard[m.rowIndex] = append(m.InlineKeyboard[m.rowIndex], illuminate.InlineKeyboardButton{
+	m.InlineKeyboard[m.rowIndex] = append(m.InlineKeyboard[m.rowIndex], InlineKeyboardButton{
 		Text:              text,
 		SwitchInlineQuery: &query,
 	})
@@ -212,7 +210,7 @@ func (m *InlineMenu) SwitchInlineQueryBtn(text, query string) *InlineMenu {
 }
 
 func (m *InlineMenu) SwitchInlineCurrentChatBtn(text, query string) *InlineMenu {
-	m.InlineKeyboard[m.rowIndex] = append(m.InlineKeyboard[m.rowIndex], illuminate.InlineKeyboardButton{
+	m.InlineKeyboard[m.rowIndex] = append(m.InlineKeyboard[m.rowIndex], InlineKeyboardButton{
 		Text:                         text,
 		SwitchInlineQueryCurrentChat: &query,
 	})
@@ -220,9 +218,9 @@ func (m *InlineMenu) SwitchInlineCurrentChatBtn(text, query string) *InlineMenu 
 }
 
 func (m *InlineMenu) SwitchInlineChosenChatBtn(
-	text string, query *illuminate.SwitchInlineQueryChosenChat,
+	text string, query *SwitchInlineQueryChosenChat,
 ) *InlineMenu {
-	m.InlineKeyboard[m.rowIndex] = append(m.InlineKeyboard[m.rowIndex], illuminate.InlineKeyboardButton{
+	m.InlineKeyboard[m.rowIndex] = append(m.InlineKeyboard[m.rowIndex], InlineKeyboardButton{
 		Text:                        text,
 		SwitchInlineQueryChosenChat: query,
 	})
@@ -230,23 +228,23 @@ func (m *InlineMenu) SwitchInlineChosenChatBtn(
 }
 
 func (m *InlineMenu) GameBtn(text string) *InlineMenu {
-	m.InlineKeyboard[m.rowIndex] = append(m.InlineKeyboard[m.rowIndex], illuminate.InlineKeyboardButton{
+	m.InlineKeyboard[m.rowIndex] = append(m.InlineKeyboard[m.rowIndex], InlineKeyboardButton{
 		Text:         text,
-		CallbackGame: &illuminate.CallbackGame{},
+		CallbackGame: &CallbackGame{},
 	})
 	return m
 }
 
 func (m *InlineMenu) PayBtn(text string) *InlineMenu {
-	m.InlineKeyboard[m.rowIndex] = append(m.InlineKeyboard[m.rowIndex], illuminate.InlineKeyboardButton{
+	m.InlineKeyboard[m.rowIndex] = append(m.InlineKeyboard[m.rowIndex], InlineKeyboardButton{
 		Text: text,
 		Pay:  true,
 	})
 	return m
 }
 
-func CallbackBtn(text, data string) illuminate.InlineKeyboardButton {
-	return illuminate.InlineKeyboardButton{
+func CallbackBtn(text, data string) InlineKeyboardButton {
+	return InlineKeyboardButton{
 		Text:         text,
 		CallbackData: data,
 	}

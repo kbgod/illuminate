@@ -29,20 +29,34 @@ func main() {
 		cancel()
 	}()
 	logger.WithContext(ctx)
-	bot := illuminate.NewBot(
-		illuminate.WithToken(os.Getenv("BOT_TOKEN")),
-		illuminate.WithLogger(zerologAdapter.NewAdapter(&logger)),
-	)
-	bofInfo, err := bot.GetMe(ctx, nil)
+	bot, err := illuminate.NewBot(os.Getenv("BOT_TOKEN"), nil)
 	if err != nil {
 		panic(err)
 	}
-	logger.Info().Str("username", string(bofInfo.Username)).Msg("bot authorized successfully")
+	logger.Info().Str("username", bot.User.Username).Msg("bot authorized successfully")
 
 	app := router.New(bot)
 	app.Use(plugin.RecoveryMiddleware(zerologAdapter.NewAdapter(&logger)))
 	app.OnStart(func(ctx *router.Context) error {
-		return plugin.Void(ctx.Reply("Hello!"))
+		return ctx.ReplyVoid("Hello!")
+	})
+	app.OnCommand("react_disco", func(ctx *router.Context) error {
+		emojis := []string{"💔", "❤️"}
+		for i := 0; i < 20; i++ {
+			emoji := emojis[i%len(emojis)]
+			logger.Info().Str("emoji", emoji).Msg("reacting")
+			err := ctx.ReplyEmojiReactionVoid(emoji)
+			if err != nil {
+				logger.Info().Err(err).Str("emoji", emoji).Msg("failed to react")
+				return err
+			}
+			time.Sleep(time.Millisecond * 100)
+		}
+
+		return err
+	})
+	app.OnCommand("react", func(ctx *router.Context) error {
+		return ctx.ReplyEmojiReactionVoid("👍")
 	})
 	app.OnCommand("fatal", func(ctx *router.Context) error {
 		var a *int
@@ -54,12 +68,12 @@ func main() {
 		return plugin.Void(ctx.Reply("Undefined command!"))
 	})
 
-	updates := bot.GetUpdatesChan(ctx)
+	updates := bot.GetUpdatesChan(nil)
 	runWorkerPool(ctx, 100, app, updates)
 
 	<-ctx.Done()
 
-	logger.Info().Str("username", string(bofInfo.Username)).Msg("bot stopped")
+	logger.Info().Str("username", bot.User.Username).Msg("bot stopped")
 }
 
 func runWorkerPool(ctx context.Context, size int, router *router.Router, updates <-chan illuminate.Update) {

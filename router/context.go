@@ -67,7 +67,25 @@ func (ctx *Context) Message() *illuminate.Message {
 		return m
 	}
 	if ctx.Update.CallbackQuery != nil && ctx.Update.CallbackQuery.Message != nil {
-		return ctx.Update.CallbackQuery.Message
+		switch m := ctx.Update.CallbackQuery.Message.(type) {
+		case illuminate.Message:
+			return &m
+		case *illuminate.Message:
+			return m
+		case illuminate.InaccessibleMessage:
+			return &illuminate.Message{
+				Chat:      m.GetChat(),
+				MessageID: m.MessageID,
+				Date:      m.Date,
+			}
+		case *illuminate.InaccessibleMessage:
+			return &illuminate.Message{
+				Chat:      m.GetChat(),
+				MessageID: m.MessageID,
+				Date:      m.Date,
+			}
+		}
+		return nil
 	}
 
 	return nil
@@ -112,7 +130,7 @@ func (ctx *Context) Chat() *illuminate.Chat {
 	}
 }
 
-func (ctx *Context) ChatID() illuminate.PeerID {
+func (ctx *Context) ChatID() int64 {
 	if c := ctx.Chat(); c != nil {
 		return c.ID
 	}
@@ -122,7 +140,7 @@ func (ctx *Context) ChatID() illuminate.PeerID {
 	}
 
 	// impossible
-	return illuminate.ChatID(0)
+	return 0
 }
 
 func (ctx *Context) CommandArgs() []string {
@@ -153,7 +171,7 @@ func (ctx *Context) Reply(text string, opts ...*illuminate.SendMessageOpts) (*il
 	if len(opts) > 0 {
 		opt = opts[0]
 	}
-	return ctx.Bot.SendMessage(ctx.Context, ctx.ChatID(), text, opt)
+	return ctx.Bot.SendMessage(ctx.ChatID(), text, opt)
 }
 
 // ReplyVoid sends message without returning result
@@ -198,7 +216,7 @@ func (ctx *Context) Answer(text string, opts ...*illuminate.AnswerCallbackQueryO
 	if len(opts) > 0 {
 		opt = opts[0]
 	}
-	return ctx.Bot.AnswerCallbackQuery(ctx.Context, ctx.Update.CallbackQuery.ID, opt)
+	return ctx.Bot.AnswerCallbackQuery(ctx.Update.CallbackQuery.ID, opt)
 }
 
 // AnswerVoid sends answer to callback query without returning result
@@ -231,11 +249,42 @@ func (ctx *Context) DeleteMessage(opts ...*illuminate.DeleteMessageOpts) (bool, 
 	if len(opts) > 0 {
 		opt = opts[0]
 	}
-	return ctx.Bot.DeleteMessage(ctx.Context, ctx.ChatID(), ctx.Message().MessageID, opt)
+	return ctx.Bot.DeleteMessage(ctx.ChatID(), ctx.Message().MessageID, opt)
 }
 
 // DeleteMessageVoid deletes message which is in update without returning result
 func DeleteMessageVoid(ctx *Context, opts ...*illuminate.DeleteMessageOpts) error {
 	_, err := ctx.DeleteMessage(opts...)
+	return err
+}
+
+func (ctx *Context) ReplyEmojiReaction(emoji ...string) (bool, error) {
+	reactions := make([]illuminate.ReactionType, 0, len(emoji))
+	for _, e := range emoji {
+		reactions = append(reactions, illuminate.ReactionTypeEmoji{Emoji: e})
+	}
+	return ctx.Bot.SetMessageReaction(ctx.ChatID(), ctx.Message().MessageID, &illuminate.SetMessageReactionOpts{
+		Reaction: reactions,
+	})
+}
+
+func (ctx *Context) ReplyEmojiReactionVoid(emoji ...string) error {
+	_, err := ctx.ReplyEmojiReaction(emoji...)
+	return err
+}
+
+func (ctx *Context) ReplyEmojiBigReaction(emoji ...string) (bool, error) {
+	reactions := make([]illuminate.ReactionType, 0, len(emoji))
+	for _, e := range emoji {
+		reactions = append(reactions, illuminate.ReactionTypeEmoji{Emoji: e})
+	}
+	return ctx.Bot.SetMessageReaction(ctx.ChatID(), ctx.Message().MessageID, &illuminate.SetMessageReactionOpts{
+		Reaction: reactions,
+		IsBig:    true,
+	})
+}
+
+func (ctx *Context) ReplyEmojiBigReactionVoid(emoji ...string) error {
+	_, err := ctx.ReplyEmojiBigReaction(emoji...)
 	return err
 }

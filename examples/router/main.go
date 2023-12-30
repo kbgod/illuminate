@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/kbgod/illuminate"
-	"github.com/kbgod/illuminate/plugin"
 	"github.com/kbgod/illuminate/router"
 )
 
@@ -108,9 +107,9 @@ func main() {
 		return nil
 	}).Name("admin.update")
 
-	app.On(anyUpdate(), func(context *router.Context) error {
+	app.On(anyUpdate(), func(ctx *router.Context) error {
 
-		return plugin.Void(bot.SendMessage(context.Context, context.ChatID(), "hello", nil))
+		return ctx.ReplyVoid("Hello!")
 
 	}).Name("any.update")
 

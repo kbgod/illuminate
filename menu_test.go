@@ -1,7 +1,6 @@
-package plugin
+package illuminate
 
 import (
-	"github.com/kbgod/illuminate"
 	"testing"
 )
 
@@ -22,7 +21,7 @@ func TestNewMenu(t *testing.T) {
 
 func TestMenu_Row(t *testing.T) {
 	menu := NewMenu()
-	menu.Row(illuminate.KeyboardButton{})
+	menu.Row(KeyboardButton{})
 	if len(menu.Keyboard) != 1 {
 		t.Error("Menu.Row failed")
 	}
@@ -30,7 +29,7 @@ func TestMenu_Row(t *testing.T) {
 		t.Error("Menu.Row failed")
 	}
 
-	menu.Row(illuminate.KeyboardButton{}, illuminate.KeyboardButton{})
+	menu.Row(KeyboardButton{}, KeyboardButton{})
 	if len(menu.Keyboard) != 2 {
 		t.Error("Menu.Row failed")
 	}
@@ -69,7 +68,7 @@ func TestMenu_TextRow(t *testing.T) {
 
 func TestMenu_Fill(t *testing.T) {
 	menu := NewMenu()
-	menu.Fill(1, illuminate.KeyboardButton{})
+	menu.Fill(1, KeyboardButton{})
 	if len(menu.Keyboard) != 1 {
 		t.Error("Menu.Fill failed")
 	}
@@ -78,7 +77,7 @@ func TestMenu_Fill(t *testing.T) {
 	}
 
 	menu = NewMenu()
-	menu.Fill(1, illuminate.KeyboardButton{}, illuminate.KeyboardButton{})
+	menu.Fill(1, KeyboardButton{}, KeyboardButton{})
 	if len(menu.Keyboard) != 2 {
 		t.Error("Menu.Fill failed")
 	}
@@ -87,7 +86,7 @@ func TestMenu_Fill(t *testing.T) {
 	}
 
 	menu = NewMenu()
-	menu.Fill(2, illuminate.KeyboardButton{}, illuminate.KeyboardButton{}, illuminate.KeyboardButton{})
+	menu.Fill(2, KeyboardButton{}, KeyboardButton{}, KeyboardButton{})
 	if len(menu.Keyboard) != 2 {
 		t.Error("Menu.Fill failed")
 	}
@@ -145,7 +144,7 @@ func TestMenu_TextFill(t *testing.T) {
 
 func TestMenu_Btn(t *testing.T) {
 	menu := NewMenu()
-	menu.Btn(illuminate.KeyboardButton{})
+	menu.Btn(KeyboardButton{})
 	if len(menu.Keyboard) != 1 {
 		t.Error("Menu.Btn failed")
 	}
@@ -221,7 +220,7 @@ func TestMenu_WebAppBtn(t *testing.T) {
 
 func TestMenu_RequestChatBtn(t *testing.T) {
 	menu := NewMenu()
-	menu.RequestChatBtn("test", &illuminate.KeyboardButtonRequestChat{})
+	menu.RequestChatBtn("test", &KeyboardButtonRequestChat{})
 	if len(menu.Keyboard) != 1 {
 		t.Error("Menu.RequestChatBtn failed")
 	}
@@ -238,7 +237,7 @@ func TestMenu_RequestChatBtn(t *testing.T) {
 
 func TestMenu_RequestUserBtn(t *testing.T) {
 	menu := NewMenu()
-	menu.RequestUserBtn("test", &illuminate.KeyboardButtonRequestUser{})
+	menu.RequestUserBtn("test", &KeyboardButtonRequestUser{})
 	if len(menu.Keyboard) != 1 {
 		t.Error("Menu.RequestUserBtn failed")
 	}
@@ -265,7 +264,7 @@ func TestNewInlineMenu(t *testing.T) {
 
 func TestInlineMenu_Row(t *testing.T) {
 	menu := NewInlineMenu()
-	menu.Row(illuminate.InlineKeyboardButton{})
+	menu.Row(InlineKeyboardButton{})
 	if len(menu.InlineKeyboard) != 1 {
 		t.Error("InlineMenu.Row failed")
 	}
@@ -273,7 +272,7 @@ func TestInlineMenu_Row(t *testing.T) {
 		t.Error("InlineMenu.Row failed")
 	}
 
-	menu.Row(illuminate.InlineKeyboardButton{}, illuminate.InlineKeyboardButton{})
+	menu.Row(InlineKeyboardButton{}, InlineKeyboardButton{})
 	if len(menu.InlineKeyboard) != 2 {
 		t.Error("InlineMenu.Row failed")
 	}
@@ -284,7 +283,7 @@ func TestInlineMenu_Row(t *testing.T) {
 
 func TestInlineMenu_Fill(t *testing.T) {
 	menu := NewInlineMenu()
-	menu.Fill(1, illuminate.InlineKeyboardButton{})
+	menu.Fill(1, InlineKeyboardButton{})
 	if len(menu.InlineKeyboard) != 1 {
 		t.Error("InlineMenu.Fill failed")
 	}
@@ -293,7 +292,7 @@ func TestInlineMenu_Fill(t *testing.T) {
 	}
 
 	menu = NewInlineMenu()
-	menu.Fill(1, illuminate.InlineKeyboardButton{}, illuminate.InlineKeyboardButton{})
+	menu.Fill(1, InlineKeyboardButton{}, InlineKeyboardButton{})
 	if len(menu.InlineKeyboard) != 2 {
 		t.Error("InlineMenu.Fill failed")
 	}
@@ -302,7 +301,7 @@ func TestInlineMenu_Fill(t *testing.T) {
 	}
 
 	menu = NewInlineMenu()
-	menu.Fill(2, illuminate.InlineKeyboardButton{}, illuminate.InlineKeyboardButton{}, illuminate.InlineKeyboardButton{})
+	menu.Fill(2, InlineKeyboardButton{}, InlineKeyboardButton{}, InlineKeyboardButton{})
 	if len(menu.InlineKeyboard) != 2 {
 		t.Error("InlineMenu.Fill failed")
 	}
@@ -313,7 +312,7 @@ func TestInlineMenu_Fill(t *testing.T) {
 
 func TestInlineMenu_Btn(t *testing.T) {
 	menu := NewInlineMenu()
-	menu.Btn(illuminate.InlineKeyboardButton{})
+	menu.Btn(InlineKeyboardButton{})
 	if len(menu.InlineKeyboard) != 1 {
 		t.Error("InlineMenu.Btn failed")
 	}
@@ -409,7 +408,7 @@ func TestInlineMenu_SwitchInlineCurrentBtn(t *testing.T) {
 
 func TestInlineMenu_SwitchInlineChosenChatBtn(t *testing.T) {
 	menu := NewInlineMenu()
-	menu.SwitchInlineChosenChatBtn("test", &illuminate.SwitchInlineQueryChosenChat{})
+	menu.SwitchInlineChosenChatBtn("test", &SwitchInlineQueryChosenChat{})
 	if len(menu.InlineKeyboard) != 1 {
 		t.Error("InlineMenu.SwitchInlineChosenChatBtn failed")
 	}
