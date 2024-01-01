@@ -253,7 +253,7 @@ func (ctx *Context) DeleteMessage(opts ...*illuminate.DeleteMessageOpts) (bool, 
 }
 
 // DeleteMessageVoid deletes message which is in update without returning result
-func DeleteMessageVoid(ctx *Context, opts ...*illuminate.DeleteMessageOpts) error {
+func (ctx *Context) DeleteMessageVoid(opts ...*illuminate.DeleteMessageOpts) error {
 	_, err := ctx.DeleteMessage(opts...)
 	return err
 }
