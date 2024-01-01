@@ -1,5 +1,9 @@
 package illuminate
 
+type IMenu interface {
+	Unwrap() ReplyMarkup
+}
+
 type Menu struct {
 	ReplyKeyboardMarkup
 	rowIndex int
