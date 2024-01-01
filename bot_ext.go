@@ -4,7 +4,8 @@ import "time"
 
 type GetUpdatesChanOpts struct {
 	*GetUpdatesOpts
-	Buffer int
+	Buffer       int
+	ErrorHandler func(error)
 }
 
 func (bot *Bot) GetUpdatesChan(opts *GetUpdatesChanOpts) <-chan Update {
@@ -22,6 +23,9 @@ func (bot *Bot) GetUpdatesChan(opts *GetUpdatesChanOpts) <-chan Update {
 		for {
 			updates, err := bot.GetUpdates(opts.GetUpdatesOpts)
 			if err != nil {
+				if opts.ErrorHandler != nil {
+					opts.ErrorHandler(err)
+				}
 				time.Sleep(time.Second * 3)
 				continue
 			}
