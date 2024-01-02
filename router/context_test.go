@@ -460,7 +460,7 @@ func (fakeHttpClient) Do(req *http.Request) (*http.Response, error) {
 	if req.URL.String() == "https://api.telegram.org/bot123:test/sendMessage" {
 		message := &illuminate.Message{
 			Chat: illuminate.Chat{
-				ID: illuminate.ChatID(chatID),
+				ID: chatID,
 			},
 			MessageID: 123,
 			Text:      sendMessage["text"],
@@ -482,7 +482,10 @@ func (fakeHttpClient) Do(req *http.Request) (*http.Response, error) {
 
 func TestContext_Reply(t *testing.T) {
 	cl := fakeHttpClient{}
-	r := New(illuminate.NewBot(illuminate.WithToken("123:test"), illuminate.WithHttpDoer(cl)))
+	bot, _ := illuminate.NewBot("123:test", &illuminate.BotOpts{
+		BotClient: cl,
+	})
+	r := New(bot)
 	ctx := newContext(context.Background(), r, &illuminate.Update{
 		Message: &illuminate.Message{
 			Chat: illuminate.Chat{

@@ -258,6 +258,36 @@ func (ctx *Context) DeleteMessageVoid(opts ...*illuminate.DeleteMessageOpts) err
 	return err
 }
 
+func (ctx *Context) EditMessageText(text string, opts ...*illuminate.EditMessageTextOpts) (*illuminate.Message, bool, error) {
+	if ctx.parseMode != nil {
+		if len(opts) == 0 {
+			opts = append(opts, &illuminate.EditMessageTextOpts{
+				ParseMode: *ctx.parseMode,
+			})
+		} else {
+			opts[0].ParseMode = *ctx.parseMode
+		}
+	}
+	var opt *illuminate.EditMessageTextOpts
+	if len(opts) > 0 {
+		opt = opts[0]
+		opt.ChatID = ctx.ChatID()
+		opt.MessageID = ctx.Message().MessageID
+	} else {
+		opt = &illuminate.EditMessageTextOpts{
+			ChatID:    ctx.ChatID(),
+			MessageID: ctx.Message().MessageID,
+		}
+	}
+
+	return ctx.Bot.EditMessageText(text, opt)
+}
+
+func (ctx *Context) EditMessageTextVoid(text string, opts ...*illuminate.EditMessageTextOpts) error {
+	_, _, err := ctx.EditMessageText(text, opts...)
+	return err
+}
+
 func (ctx *Context) ReplyEmojiReaction(emoji ...string) (bool, error) {
 	reactions := make([]illuminate.ReactionType, 0, len(emoji))
 	for _, e := range emoji {
