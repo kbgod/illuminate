@@ -30,6 +30,10 @@ go get github.com/kbgod/illuminate
 
 *in progress...*
 
+### Quick start
+
+You can find a quick start guide [here](https://github.com/kbgod/tg-bot-layout).
+
 ## Docs
 
 Docs can be found [here](https://pkg.go.dev/github.com/kbgod/illuminate).
