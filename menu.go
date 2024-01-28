@@ -247,6 +247,16 @@ func (m *InlineMenu) PayBtn(text string) *InlineMenu {
 	return m
 }
 
+func (m *InlineMenu) WebAppBtn(text, url string) *InlineMenu {
+	m.InlineKeyboard[m.rowIndex] = append(m.InlineKeyboard[m.rowIndex], InlineKeyboardButton{
+		Text: text,
+		WebApp: &WebAppInfo{
+			Url: url,
+		},
+	})
+	return m
+}
+
 func CallbackBtn(text, data string) InlineKeyboardButton {
 	return InlineKeyboardButton{
 		Text:         text,
