@@ -26,7 +26,7 @@ var (
 //
 // This object represents an animation file (GIF or H.264/MPEG-4 AVC video without sound).
 type Animation struct {
-	// IDentifier for this file, which can be used to download or reuse the file
+	// Identifier for this file, which can be used to download or reuse the file
 	FileID string `json:"file_id"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
 	FileUniqueID string `json:"file_unique_id"`
@@ -50,7 +50,7 @@ type Animation struct {
 //
 // This object represents an audio file to be treated as music by the Telegram clients.
 type Audio struct {
-	// IDentifier for this file, which can be used to download or reuse the file
+	// Identifier for this file, which can be used to download or reuse the file
 	FileID string `json:"file_id"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
 	FileUniqueID string `json:"file_unique_id"`
@@ -68,6 +68,16 @@ type Audio struct {
 	FileSize int64 `json:"file_size,omitempty"`
 	// Optional. Thumbnail of the album cover to which the music file belongs
 	Thumbnail *PhotoSize `json:"thumbnail,omitempty"`
+}
+
+// Birthdate (https://core.telegram.org/bots/api#birthdate)
+type Birthdate struct {
+	// Day of the user's birth; 1-31
+	Day int64 `json:"day"`
+	// Month of the user's birth; 1-12
+	Month int64 `json:"month"`
+	// Optional. Year of the user's birth
+	Year int64 `json:"year,omitempty"`
 }
 
 // BotCommand (https://core.telegram.org/bots/api#botcommand)
@@ -92,10 +102,10 @@ type BotCommand struct {
 //   - BotCommandScopeChatMember
 type BotCommandScope interface {
 	GetType() string
-	// botCommandScope exists to avoid external types implementing this interface.
-	botCommandScope()
 	// MergeBotCommandScope returns a MergedBotCommandScope struct to simplify working with complex telegram types in a non-generic world.
 	MergeBotCommandScope() MergedBotCommandScope
+	// botCommandScope exists to avoid external types implementing this interface.
+	botCommandScope()
 }
 
 // Ensure that all subtypes correctly implement the parent interface.
@@ -402,6 +412,70 @@ type BotShortDescription struct {
 	ShortDescription string `json:"short_description"`
 }
 
+// BusinessConnection (https://core.telegram.org/bots/api#businessconnection)
+//
+// Describes the connection of the bot with a business account.
+type BusinessConnection struct {
+	// Unique identifier of the business connection
+	ID string `json:"id"`
+	// Business account user that created the business connection
+	User User `json:"user"`
+	// Identifier of a private chat with the user who created the business connection. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a 64-bit integer or double-precision float type are safe for storing this identifier.
+	UserChatID int64 `json:"user_chat_id"`
+	// Date the connection was established in Unix time
+	Date int64 `json:"date"`
+	// True, if the bot can act on behalf of the business account in chats that were active in the last 24 hours
+	CanReply bool `json:"can_reply"`
+	// True, if the connection is active
+	IsEnabled bool `json:"is_enabled"`
+}
+
+// BusinessIntro (https://core.telegram.org/bots/api#businessintro)
+type BusinessIntro struct {
+	// Optional. Title text of the business intro
+	Title string `json:"title,omitempty"`
+	// Optional. Message text of the business intro
+	Message string `json:"message,omitempty"`
+	// Optional. Sticker of the business intro
+	Sticker *Sticker `json:"sticker,omitempty"`
+}
+
+// BusinessLocation (https://core.telegram.org/bots/api#businesslocation)
+type BusinessLocation struct {
+	// Address of the business
+	Address string `json:"address"`
+	// Optional. Location of the business
+	Location *Location `json:"location,omitempty"`
+}
+
+// BusinessMessagesDeleted (https://core.telegram.org/bots/api#businessmessagesdeleted)
+//
+// This object is received when messages are deleted from a connected business account.
+type BusinessMessagesDeleted struct {
+	// Unique identifier of the business connection
+	BusinessConnectionID string `json:"business_connection_id"`
+	// Information about a chat in the business account. The bot may not have access to the chat or the corresponding user.
+	Chat Chat `json:"chat"`
+	// A JSON-serialized list of identifiers of deleted messages in the chat of the business account
+	MessageIDs []int64 `json:"message_ids,omitempty"`
+}
+
+// BusinessOpeningHours (https://core.telegram.org/bots/api#businessopeninghours)
+type BusinessOpeningHours struct {
+	// Unique name of the time zone for which the opening hours are defined
+	TimeZoneName string `json:"time_zone_name"`
+	// List of time intervals describing business opening hours
+	OpeningHours []BusinessOpeningHoursInterval `json:"opening_hours,omitempty"`
+}
+
+// BusinessOpeningHoursInterval (https://core.telegram.org/bots/api#businessopeninghoursinterval)
+type BusinessOpeningHoursInterval struct {
+	// The minute's sequence number in a week, starting on Monday, marking the start of the time interval during which the business is open; 0 - 7 * 24 * 60
+	OpeningMinute int64 `json:"opening_minute"`
+	// The minute's sequence number in a week, starting on Monday, marking the end of the time interval during which the business is open; 0 - 8 * 24 * 60
+	ClosingMinute int64 `json:"closing_minute"`
+}
+
 // CallbackGame (https://core.telegram.org/bots/api#callbackgame)
 //
 // A placeholder, currently holds no information. Use BotFather to set up your game.
@@ -417,7 +491,7 @@ type CallbackQuery struct {
 	From User `json:"from"`
 	// Optional. Message sent by the bot with the callback button that originated the query
 	Message MaybeInaccessibleMessage `json:"message,omitempty"`
-	// Optional. IDentifier of the message sent via the bot in inline mode, that originated the query.
+	// Optional. Identifier of the message sent via the bot in inline mode, that originated the query.
 	InlineMessageID string `json:"inline_message_id,omitempty"`
 	// Global identifier, uniquely corresponding to the chat to which the message with the callback button was sent. Useful for high scores in games.
 	ChatInstance string `json:"chat_instance"`
@@ -442,14 +516,14 @@ func (v *CallbackQuery) UnmarshalJSON(b []byte) error {
 	t := tmp{}
 	err := json.Unmarshal(b, &t)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal CallbackQuery JSON into tmp struct: %w", err)
 	}
 
 	v.ID = t.ID
 	v.From = t.From
 	v.Message, err = unmarshalMaybeInaccessibleMessage(t.Message)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal custom JSON field Message: %w", err)
 	}
 	v.InlineMessageID = t.InlineMessageID
 	v.ChatInstance = t.ChatInstance
@@ -481,13 +555,23 @@ type Chat struct {
 	Photo *ChatPhoto `json:"photo,omitempty"`
 	// Optional. If non-empty, the list of all active chat usernames; for private chats, supergroups and channels. Returned only in getChat.
 	ActiveUsernames []string `json:"active_usernames,omitempty"`
+	// Optional. For private chats, the date of birth of the user. Returned only in getChat.
+	Birthdate *Birthdate `json:"birthdate,omitempty"`
+	// Optional. For private chats with business accounts, the intro of the business. Returned only in getChat.
+	BusinessIntro *BusinessIntro `json:"business_intro,omitempty"`
+	// Optional. For private chats with business accounts, the location of the business. Returned only in getChat.
+	BusinessLocation *BusinessLocation `json:"business_location,omitempty"`
+	// Optional. For private chats with business accounts, the opening hours of the business. Returned only in getChat.
+	BusinessOpeningHours *BusinessOpeningHours `json:"business_opening_hours,omitempty"`
+	// Optional. For private chats, the personal channel of the user. Returned only in getChat.
+	PersonalChat *Chat `json:"personal_chat,omitempty"`
 	// Optional. List of available reactions allowed in the chat. If omitted, then all emoji reactions are allowed. Returned only in getChat.
 	AvailableReactions []ReactionType `json:"available_reactions,omitempty"`
-	// Optional. IDentifier of the accent color for the chat name and backgrounds of the chat photo, reply header, and link preview. See accent colors for more details. Returned only in getChat. Always returned in getChat.
+	// Optional. Identifier of the accent color for the chat name and backgrounds of the chat photo, reply header, and link preview. See accent colors for more details. Returned only in getChat. Always returned in getChat.
 	AccentColorID int64 `json:"accent_color_id,omitempty"`
 	// Optional. Custom emoji identifier of emoji chosen by the chat for the reply header and link preview background. Returned only in getChat.
 	BackgroundCustomEmojiID string `json:"background_custom_emoji_id,omitempty"`
-	// Optional. IDentifier of the accent color for the chat's profile background. See profile accent colors for more details. Returned only in getChat.
+	// Optional. Identifier of the accent color for the chat's profile background. See profile accent colors for more details. Returned only in getChat.
 	ProfileAccentColorID int64 `json:"profile_accent_color_id,omitempty"`
 	// Optional. Custom emoji identifier of the emoji chosen by the chat for its profile background. Returned only in getChat.
 	ProfileBackgroundCustomEmojiID string `json:"profile_background_custom_emoji_id,omitempty"`
@@ -513,8 +597,10 @@ type Chat struct {
 	PinnedMessage *Message `json:"pinned_message,omitempty"`
 	// Optional. Default chat member permissions, for groups and supergroups. Returned only in getChat.
 	Permissions *ChatPermissions `json:"permissions,omitempty"`
-	// Optional. For supergroups, the minimum allowed delay between consecutive messages sent by each unpriviledged user; in seconds. Returned only in getChat.
+	// Optional. For supergroups, the minimum allowed delay between consecutive messages sent by each unprivileged user; in seconds. Returned only in getChat.
 	SlowModeDelay int64 `json:"slow_mode_delay,omitempty"`
+	// Optional. For supergroups, the minimum number of boosts that a non-administrator user needs to add in order to ignore slow mode and chat permissions. Returned only in getChat.
+	UnrestrictBoostCount int64 `json:"unrestrict_boost_count,omitempty"`
 	// Optional. The time after which all messages sent to the chat will be automatically deleted; in seconds. Returned only in getChat.
 	MessageAutoDeleteTime int64 `json:"message_auto_delete_time,omitempty"`
 	// Optional. True, if aggressive anti-spam checks are enabled in the supergroup. The field is only available to chat administrators. Returned only in getChat.
@@ -529,10 +615,114 @@ type Chat struct {
 	StickerSetName string `json:"sticker_set_name,omitempty"`
 	// Optional. True, if the bot can change the group sticker set. Returned only in getChat.
 	CanSetStickerSet bool `json:"can_set_sticker_set,omitempty"`
+	// Optional. For supergroups, the name of the group's custom emoji sticker set. Custom emoji from this set can be used by all users and bots in the group. Returned only in getChat.
+	CustomEmojiStickerSetName string `json:"custom_emoji_sticker_set_name,omitempty"`
 	// Optional. Unique identifier for the linked chat, i.e. the discussion group identifier for a channel and vice versa; for supergroups and channel chats. This identifier may be greater than 32 bits and some programming languages may have difficulty/silent defects in interpreting it. But it is smaller than 52 bits, so a signed 64 bit integer or double-precision float type are safe for storing this identifier. Returned only in getChat.
 	LinkedChatID int64 `json:"linked_chat_id,omitempty"`
 	// Optional. For supergroups, the location to which the supergroup is connected. Returned only in getChat.
 	Location *ChatLocation `json:"location,omitempty"`
+}
+
+// UnmarshalJSON is a custom JSON unmarshaller to use the helpers which allow for unmarshalling structs into interfaces.
+func (v *Chat) UnmarshalJSON(b []byte) error {
+	// All fields in Chat, with interface fields as json.RawMessage
+	type tmp struct {
+		ID                                 int64                 `json:"id"`
+		Type                               string                `json:"type"`
+		Title                              string                `json:"title"`
+		Username                           string                `json:"username"`
+		FirstName                          string                `json:"first_name"`
+		LastName                           string                `json:"last_name"`
+		IsForum                            bool                  `json:"is_forum"`
+		Photo                              *ChatPhoto            `json:"photo"`
+		ActiveUsernames                    []string              `json:"active_usernames"`
+		Birthdate                          *Birthdate            `json:"birthdate"`
+		BusinessIntro                      *BusinessIntro        `json:"business_intro"`
+		BusinessLocation                   *BusinessLocation     `json:"business_location"`
+		BusinessOpeningHours               *BusinessOpeningHours `json:"business_opening_hours"`
+		PersonalChat                       *Chat                 `json:"personal_chat"`
+		AvailableReactions                 json.RawMessage       `json:"available_reactions"`
+		AccentColorID                      int64                 `json:"accent_color_id"`
+		BackgroundCustomEmojiID            string                `json:"background_custom_emoji_id"`
+		ProfileAccentColorID               int64                 `json:"profile_accent_color_id"`
+		ProfileBackgroundCustomEmojiID     string                `json:"profile_background_custom_emoji_id"`
+		EmojiStatusCustomEmojiID           string                `json:"emoji_status_custom_emoji_id"`
+		EmojiStatusExpirationDate          int64                 `json:"emoji_status_expiration_date"`
+		Bio                                string                `json:"bio"`
+		HasPrivateForwards                 bool                  `json:"has_private_forwards"`
+		HasRestrictedVoiceAndVideoMessages bool                  `json:"has_restricted_voice_and_video_messages"`
+		JoinToSendMessages                 bool                  `json:"join_to_send_messages"`
+		JoinByRequest                      bool                  `json:"join_by_request"`
+		Description                        string                `json:"description"`
+		InviteLink                         string                `json:"invite_link"`
+		PinnedMessage                      *Message              `json:"pinned_message"`
+		Permissions                        *ChatPermissions      `json:"permissions"`
+		SlowModeDelay                      int64                 `json:"slow_mode_delay"`
+		UnrestrictBoostCount               int64                 `json:"unrestrict_boost_count"`
+		MessageAutoDeleteTime              int64                 `json:"message_auto_delete_time"`
+		HasAggressiveAntiSpamEnabled       bool                  `json:"has_aggressive_anti_spam_enabled"`
+		HasHiddenMembers                   bool                  `json:"has_hidden_members"`
+		HasProtectedContent                bool                  `json:"has_protected_content"`
+		HasVisibleHistory                  bool                  `json:"has_visible_history"`
+		StickerSetName                     string                `json:"sticker_set_name"`
+		CanSetStickerSet                   bool                  `json:"can_set_sticker_set"`
+		CustomEmojiStickerSetName          string                `json:"custom_emoji_sticker_set_name"`
+		LinkedChatID                       int64                 `json:"linked_chat_id"`
+		Location                           *ChatLocation         `json:"location"`
+	}
+	t := tmp{}
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal Chat JSON into tmp struct: %w", err)
+	}
+
+	v.ID = t.ID
+	v.Type = t.Type
+	v.Title = t.Title
+	v.Username = t.Username
+	v.FirstName = t.FirstName
+	v.LastName = t.LastName
+	v.IsForum = t.IsForum
+	v.Photo = t.Photo
+	v.ActiveUsernames = t.ActiveUsernames
+	v.Birthdate = t.Birthdate
+	v.BusinessIntro = t.BusinessIntro
+	v.BusinessLocation = t.BusinessLocation
+	v.BusinessOpeningHours = t.BusinessOpeningHours
+	v.PersonalChat = t.PersonalChat
+	v.AvailableReactions, err = unmarshalReactionTypeArray(t.AvailableReactions)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal custom JSON field AvailableReactions: %w", err)
+	}
+	v.AccentColorID = t.AccentColorID
+	v.BackgroundCustomEmojiID = t.BackgroundCustomEmojiID
+	v.ProfileAccentColorID = t.ProfileAccentColorID
+	v.ProfileBackgroundCustomEmojiID = t.ProfileBackgroundCustomEmojiID
+	v.EmojiStatusCustomEmojiID = t.EmojiStatusCustomEmojiID
+	v.EmojiStatusExpirationDate = t.EmojiStatusExpirationDate
+	v.Bio = t.Bio
+	v.HasPrivateForwards = t.HasPrivateForwards
+	v.HasRestrictedVoiceAndVideoMessages = t.HasRestrictedVoiceAndVideoMessages
+	v.JoinToSendMessages = t.JoinToSendMessages
+	v.JoinByRequest = t.JoinByRequest
+	v.Description = t.Description
+	v.InviteLink = t.InviteLink
+	v.PinnedMessage = t.PinnedMessage
+	v.Permissions = t.Permissions
+	v.SlowModeDelay = t.SlowModeDelay
+	v.UnrestrictBoostCount = t.UnrestrictBoostCount
+	v.MessageAutoDeleteTime = t.MessageAutoDeleteTime
+	v.HasAggressiveAntiSpamEnabled = t.HasAggressiveAntiSpamEnabled
+	v.HasHiddenMembers = t.HasHiddenMembers
+	v.HasProtectedContent = t.HasProtectedContent
+	v.HasVisibleHistory = t.HasVisibleHistory
+	v.StickerSetName = t.StickerSetName
+	v.CanSetStickerSet = t.CanSetStickerSet
+	v.CustomEmojiStickerSetName = t.CustomEmojiStickerSetName
+	v.LinkedChatID = t.LinkedChatID
+	v.Location = t.Location
+
+	return nil
 }
 
 // ChatAdministratorRights (https://core.telegram.org/bots/api#chatadministratorrights)
@@ -541,7 +731,7 @@ type Chat struct {
 type ChatAdministratorRights struct {
 	// True, if the user's presence in the chat is hidden
 	IsAnonymous bool `json:"is_anonymous"`
-	// True, if the administrator can access the chat event log, boost list in channels, see channel members, report spam messages, see anonymous administrators in supergroups and ignore slow mode. Implied by any other administrator privilege
+	// True, if the administrator can access the chat event log, get boost list, see hidden supergroup and channel members, report spam messages and ignore slow mode. Implied by any other administrator privilege.
 	CanManageChat bool `json:"can_manage_chat"`
 	// True, if the administrator can delete messages of other users
 	CanDeleteMessages bool `json:"can_delete_messages"`
@@ -555,19 +745,19 @@ type ChatAdministratorRights struct {
 	CanChangeInfo bool `json:"can_change_info"`
 	// True, if the user is allowed to invite new users to the chat
 	CanInviteUsers bool `json:"can_invite_users"`
-	// Optional. True, if the administrator can post messages in the channel, or access channel statistics; channels only
+	// True, if the administrator can post stories to the chat
+	CanPostStories bool `json:"can_post_stories"`
+	// True, if the administrator can edit stories posted by other users
+	CanEditStories bool `json:"can_edit_stories"`
+	// True, if the administrator can delete stories posted by other users
+	CanDeleteStories bool `json:"can_delete_stories"`
+	// Optional. True, if the administrator can post messages in the channel, or access channel statistics; for channels only
 	CanPostMessages bool `json:"can_post_messages,omitempty"`
-	// Optional. True, if the administrator can edit messages of other users and can pin messages; channels only
+	// Optional. True, if the administrator can edit messages of other users and can pin messages; for channels only
 	CanEditMessages bool `json:"can_edit_messages,omitempty"`
-	// Optional. True, if the user is allowed to pin messages; groups and supergroups only
+	// Optional. True, if the user is allowed to pin messages; for groups and supergroups only
 	CanPinMessages bool `json:"can_pin_messages,omitempty"`
-	// Optional. True, if the administrator can post stories in the channel; channels only
-	CanPostStories bool `json:"can_post_stories,omitempty"`
-	// Optional. True, if the administrator can edit stories posted by other users; channels only
-	CanEditStories bool `json:"can_edit_stories,omitempty"`
-	// Optional. True, if the administrator can delete stories posted by other users; channels only
-	CanDeleteStories bool `json:"can_delete_stories,omitempty"`
-	// Optional. True, if the user is allowed to create, rename, close, and reopen forum topics; supergroups only
+	// Optional. True, if the user is allowed to create, rename, close, and reopen forum topics; for supergroups only
 	CanManageTopics bool `json:"can_manage_topics,omitempty"`
 }
 
@@ -597,7 +787,7 @@ func (v *ChatBoost) UnmarshalJSON(b []byte) error {
 	t := tmp{}
 	err := json.Unmarshal(b, &t)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal ChatBoost JSON into tmp struct: %w", err)
 	}
 
 	v.BoostID = t.BoostID
@@ -605,10 +795,18 @@ func (v *ChatBoost) UnmarshalJSON(b []byte) error {
 	v.ExpirationDate = t.ExpirationDate
 	v.Source, err = unmarshalChatBoostSource(t.Source)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal custom JSON field Source: %w", err)
 	}
 
 	return nil
+}
+
+// ChatBoostAdded (https://core.telegram.org/bots/api#chatboostadded)
+//
+// This object represents a service message about a user boosting a chat.
+type ChatBoostAdded struct {
+	// Number of boosts added by the user
+	BoostCount int64 `json:"boost_count"`
 }
 
 // ChatBoostRemoved (https://core.telegram.org/bots/api#chatboostremoved)
@@ -637,7 +835,7 @@ func (v *ChatBoostRemoved) UnmarshalJSON(b []byte) error {
 	t := tmp{}
 	err := json.Unmarshal(b, &t)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal ChatBoostRemoved JSON into tmp struct: %w", err)
 	}
 
 	v.Chat = t.Chat
@@ -645,7 +843,7 @@ func (v *ChatBoostRemoved) UnmarshalJSON(b []byte) error {
 	v.RemoveDate = t.RemoveDate
 	v.Source, err = unmarshalChatBoostSource(t.Source)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal custom JSON field Source: %w", err)
 	}
 
 	return nil
@@ -659,10 +857,10 @@ func (v *ChatBoostRemoved) UnmarshalJSON(b []byte) error {
 //   - ChatBoostSourceGiveaway
 type ChatBoostSource interface {
 	GetSource() string
-	// chatBoostSource exists to avoid external types implementing this interface.
-	chatBoostSource()
 	// MergeChatBoostSource returns a MergedChatBoostSource struct to simplify working with complex telegram types in a non-generic world.
 	MergeChatBoostSource() MergedChatBoostSource
+	// chatBoostSource exists to avoid external types implementing this interface.
+	chatBoostSource()
 }
 
 // Ensure that all subtypes correctly implement the parent interface.
@@ -678,7 +876,7 @@ type MergedChatBoostSource struct {
 	Source string `json:"source"`
 	// Optional. User that provided the boost (may be empty for ChatBoostSourceGiveaway)
 	User *User `json:"user,omitempty"`
-	// Optional. IDentifier of a message in the chat with the giveaway; the message could have been deleted already. May be 0 if the message isn't sent yet. (Only for giveaway)
+	// Optional. Identifier of a message in the chat with the giveaway; the message could have been deleted already. May be 0 if the message isn't sent yet. (Only for giveaway)
 	GiveawayMessageID int64 `json:"giveaway_message_id,omitempty"`
 	// Optional. True, if the giveaway was completed, but there was no user to win the prize (Only for giveaway)
 	IsUnclaimed bool `json:"is_unclaimed,omitempty"`
@@ -700,17 +898,21 @@ func (v MergedChatBoostSource) MergeChatBoostSource() MergedChatBoostSource {
 // unmarshalChatBoostSourceArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
 // using unmarshalChatBoostSource.
 func unmarshalChatBoostSourceArray(d json.RawMessage) ([]ChatBoostSource, error) {
+	if len(d) == 0 {
+		return nil, nil
+	}
+
 	var ds []json.RawMessage
 	err := json.Unmarshal(d, &ds)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal initial ChatBoostSource JSON into an array: %w", err)
 	}
 
 	var vs []ChatBoostSource
-	for _, d := range ds {
+	for idx, d := range ds {
 		v, err := unmarshalChatBoostSource(d)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal ChatBoostSource on array item %d: %w", idx, err)
 		}
 		vs = append(vs, v)
 	}
@@ -730,7 +932,7 @@ func unmarshalChatBoostSource(d json.RawMessage) (ChatBoostSource, error) {
 	}{}
 	err := json.Unmarshal(d, &t)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal ChatBoostSource for constant field 'Source': %w", err)
 	}
 
 	switch t.Source {
@@ -738,7 +940,7 @@ func unmarshalChatBoostSource(d json.RawMessage) (ChatBoostSource, error) {
 		s := ChatBoostSourcePremium{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal ChatBoostSource for value 'premium': %w", err)
 		}
 		return s, nil
 
@@ -746,7 +948,7 @@ func unmarshalChatBoostSource(d json.RawMessage) (ChatBoostSource, error) {
 		s := ChatBoostSourceGiftCode{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal ChatBoostSource for value 'gift_code': %w", err)
 		}
 		return s, nil
 
@@ -754,12 +956,12 @@ func unmarshalChatBoostSource(d json.RawMessage) (ChatBoostSource, error) {
 		s := ChatBoostSourceGiveaway{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal ChatBoostSource for value 'giveaway': %w", err)
 		}
 		return s, nil
 
 	}
-	return nil, fmt.Errorf("unknown interface with Source %v", t.Source)
+	return nil, fmt.Errorf("unknown interface for ChatBoostSource with Source %v", t.Source)
 }
 
 // ChatBoostSourceGiftCode (https://core.telegram.org/bots/api#chatboostsourcegiftcode)
@@ -803,7 +1005,7 @@ func (v ChatBoostSourceGiftCode) chatBoostSource() {}
 //
 // The boost was obtained by the creation of a Telegram Premium giveaway. This boosts the chat 4 times for the duration of the corresponding Telegram Premium subscription.
 type ChatBoostSourceGiveaway struct {
-	// IDentifier of a message in the chat with the giveaway; the message could have been deleted already. May be 0 if the message isn't sent yet.
+	// Identifier of a message in the chat with the giveaway; the message could have been deleted already. May be 0 if the message isn't sent yet.
 	GiveawayMessageID int64 `json:"giveaway_message_id"`
 	// Optional. User that won the prize in the giveaway if any
 	User *User `json:"user,omitempty"`
@@ -885,7 +1087,7 @@ func (v ChatBoostSourcePremium) chatBoostSource() {}
 type ChatBoostUpdated struct {
 	// Chat which was boosted
 	Chat Chat `json:"chat"`
-	// Infomation about the chat boost
+	// Information about the chat boost
 	Boost ChatBoost `json:"boost"`
 }
 
@@ -921,7 +1123,7 @@ type ChatJoinRequest struct {
 	Chat Chat `json:"chat"`
 	// User that sent the join request
 	From User `json:"from"`
-	// IDentifier of a private chat with the user who sent the join request. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a 64-bit integer or double-precision float type are safe for storing this identifier. The bot can use this identifier for 5 minutes to send messages until the join request is processed, assuming no other administrator contacted the user.
+	// Identifier of a private chat with the user who sent the join request. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a 64-bit integer or double-precision float type are safe for storing this identifier. The bot can use this identifier for 5 minutes to send messages until the join request is processed, assuming no other administrator contacted the user.
 	UserChatID int64 `json:"user_chat_id"`
 	// Date the request was sent in Unix time
 	Date int64 `json:"date"`
@@ -953,10 +1155,10 @@ type ChatLocation struct {
 type ChatMember interface {
 	GetStatus() string
 	GetUser() User
-	// chatMember exists to avoid external types implementing this interface.
-	chatMember()
 	// MergeChatMember returns a MergedChatMember struct to simplify working with complex telegram types in a non-generic world.
 	MergeChatMember() MergedChatMember
+	// chatMember exists to avoid external types implementing this interface.
+	chatMember()
 }
 
 // Ensure that all subtypes correctly implement the parent interface.
@@ -981,7 +1183,7 @@ type MergedChatMember struct {
 	CustomTitle string `json:"custom_title,omitempty"`
 	// Optional. True, if the bot is allowed to edit administrator privileges of that user (Only for administrator)
 	CanBeEdited bool `json:"can_be_edited,omitempty"`
-	// Optional. True, if the administrator can access the chat event log, boost list in channels, see channel members, report spam messages, see anonymous administrators in supergroups and ignore slow mode. Implied by any other administrator privilege (Only for administrator)
+	// Optional. True, if the administrator can access the chat event log, get boost list, see hidden supergroup and channel members, report spam messages and ignore slow mode. Implied by any other administrator privilege. (Only for administrator)
 	CanManageChat bool `json:"can_manage_chat,omitempty"`
 	// Optional. True, if the administrator can delete messages of other users (Only for administrator)
 	CanDeleteMessages bool `json:"can_delete_messages,omitempty"`
@@ -995,19 +1197,19 @@ type MergedChatMember struct {
 	CanChangeInfo bool `json:"can_change_info,omitempty"`
 	// Optional. True, if the user is allowed to invite new users to the chat (Only for administrator, restricted)
 	CanInviteUsers bool `json:"can_invite_users,omitempty"`
-	// Optional. True, if the administrator can post messages in the channel, or access channel statistics; channels only (Only for administrator)
-	CanPostMessages bool `json:"can_post_messages,omitempty"`
-	// Optional. True, if the administrator can edit messages of other users and can pin messages; channels only (Only for administrator)
-	CanEditMessages bool `json:"can_edit_messages,omitempty"`
-	// Optional. True, if the user is allowed to pin messages; groups and supergroups only (Only for administrator, restricted)
-	CanPinMessages bool `json:"can_pin_messages,omitempty"`
-	// Optional. True, if the administrator can post stories in the channel; channels only (Only for administrator)
+	// Optional. True, if the administrator can post stories to the chat (Only for administrator)
 	CanPostStories bool `json:"can_post_stories,omitempty"`
-	// Optional. True, if the administrator can edit stories posted by other users; channels only (Only for administrator)
+	// Optional. True, if the administrator can edit stories posted by other users (Only for administrator)
 	CanEditStories bool `json:"can_edit_stories,omitempty"`
-	// Optional. True, if the administrator can delete stories posted by other users; channels only (Only for administrator)
+	// Optional. True, if the administrator can delete stories posted by other users (Only for administrator)
 	CanDeleteStories bool `json:"can_delete_stories,omitempty"`
-	// Optional. True, if the user is allowed to create, rename, close, and reopen forum topics; supergroups only (Only for administrator, restricted)
+	// Optional. True, if the administrator can post messages in the channel, or access channel statistics; for channels only (Only for administrator)
+	CanPostMessages bool `json:"can_post_messages,omitempty"`
+	// Optional. True, if the administrator can edit messages of other users and can pin messages; for channels only (Only for administrator)
+	CanEditMessages bool `json:"can_edit_messages,omitempty"`
+	// Optional. True, if the user is allowed to pin messages; for groups and supergroups only (Only for administrator, restricted)
+	CanPinMessages bool `json:"can_pin_messages,omitempty"`
+	// Optional. True, if the user is allowed to create, rename, close, and reopen forum topics; for supergroups only (Only for administrator, restricted)
 	CanManageTopics bool `json:"can_manage_topics,omitempty"`
 	// Optional. True, if the user is a member of the chat at the moment of the request (Only for restricted)
 	IsMember bool `json:"is_member,omitempty"`
@@ -1056,17 +1258,21 @@ func (v MergedChatMember) MergeChatMember() MergedChatMember {
 // unmarshalChatMemberArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
 // using unmarshalChatMember.
 func unmarshalChatMemberArray(d json.RawMessage) ([]ChatMember, error) {
+	if len(d) == 0 {
+		return nil, nil
+	}
+
 	var ds []json.RawMessage
 	err := json.Unmarshal(d, &ds)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal initial ChatMember JSON into an array: %w", err)
 	}
 
 	var vs []ChatMember
-	for _, d := range ds {
+	for idx, d := range ds {
 		v, err := unmarshalChatMember(d)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal ChatMember on array item %d: %w", idx, err)
 		}
 		vs = append(vs, v)
 	}
@@ -1086,7 +1292,7 @@ func unmarshalChatMember(d json.RawMessage) (ChatMember, error) {
 	}{}
 	err := json.Unmarshal(d, &t)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal ChatMember for constant field 'Status': %w", err)
 	}
 
 	switch t.Status {
@@ -1094,7 +1300,7 @@ func unmarshalChatMember(d json.RawMessage) (ChatMember, error) {
 		s := ChatMemberOwner{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal ChatMember for value 'creator': %w", err)
 		}
 		return s, nil
 
@@ -1102,7 +1308,7 @@ func unmarshalChatMember(d json.RawMessage) (ChatMember, error) {
 		s := ChatMemberAdministrator{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal ChatMember for value 'administrator': %w", err)
 		}
 		return s, nil
 
@@ -1110,7 +1316,7 @@ func unmarshalChatMember(d json.RawMessage) (ChatMember, error) {
 		s := ChatMemberMember{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal ChatMember for value 'member': %w", err)
 		}
 		return s, nil
 
@@ -1118,7 +1324,7 @@ func unmarshalChatMember(d json.RawMessage) (ChatMember, error) {
 		s := ChatMemberRestricted{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal ChatMember for value 'restricted': %w", err)
 		}
 		return s, nil
 
@@ -1126,7 +1332,7 @@ func unmarshalChatMember(d json.RawMessage) (ChatMember, error) {
 		s := ChatMemberLeft{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal ChatMember for value 'left': %w", err)
 		}
 		return s, nil
 
@@ -1134,12 +1340,12 @@ func unmarshalChatMember(d json.RawMessage) (ChatMember, error) {
 		s := ChatMemberBanned{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal ChatMember for value 'kicked': %w", err)
 		}
 		return s, nil
 
 	}
-	return nil, fmt.Errorf("unknown interface with Status %v", t.Status)
+	return nil, fmt.Errorf("unknown interface for ChatMember with Status %v", t.Status)
 }
 
 // ChatMemberAdministrator (https://core.telegram.org/bots/api#chatmemberadministrator)
@@ -1152,7 +1358,7 @@ type ChatMemberAdministrator struct {
 	CanBeEdited bool `json:"can_be_edited"`
 	// True, if the user's presence in the chat is hidden
 	IsAnonymous bool `json:"is_anonymous"`
-	// True, if the administrator can access the chat event log, boost list in channels, see channel members, report spam messages, see anonymous administrators in supergroups and ignore slow mode. Implied by any other administrator privilege
+	// True, if the administrator can access the chat event log, get boost list, see hidden supergroup and channel members, report spam messages and ignore slow mode. Implied by any other administrator privilege.
 	CanManageChat bool `json:"can_manage_chat"`
 	// True, if the administrator can delete messages of other users
 	CanDeleteMessages bool `json:"can_delete_messages"`
@@ -1166,19 +1372,19 @@ type ChatMemberAdministrator struct {
 	CanChangeInfo bool `json:"can_change_info"`
 	// True, if the user is allowed to invite new users to the chat
 	CanInviteUsers bool `json:"can_invite_users"`
-	// Optional. True, if the administrator can post messages in the channel, or access channel statistics; channels only
+	// True, if the administrator can post stories to the chat
+	CanPostStories bool `json:"can_post_stories"`
+	// True, if the administrator can edit stories posted by other users
+	CanEditStories bool `json:"can_edit_stories"`
+	// True, if the administrator can delete stories posted by other users
+	CanDeleteStories bool `json:"can_delete_stories"`
+	// Optional. True, if the administrator can post messages in the channel, or access channel statistics; for channels only
 	CanPostMessages bool `json:"can_post_messages,omitempty"`
-	// Optional. True, if the administrator can edit messages of other users and can pin messages; channels only
+	// Optional. True, if the administrator can edit messages of other users and can pin messages; for channels only
 	CanEditMessages bool `json:"can_edit_messages,omitempty"`
-	// Optional. True, if the user is allowed to pin messages; groups and supergroups only
+	// Optional. True, if the user is allowed to pin messages; for groups and supergroups only
 	CanPinMessages bool `json:"can_pin_messages,omitempty"`
-	// Optional. True, if the administrator can post stories in the channel; channels only
-	CanPostStories bool `json:"can_post_stories,omitempty"`
-	// Optional. True, if the administrator can edit stories posted by other users; channels only
-	CanEditStories bool `json:"can_edit_stories,omitempty"`
-	// Optional. True, if the administrator can delete stories posted by other users; channels only
-	CanDeleteStories bool `json:"can_delete_stories,omitempty"`
-	// Optional. True, if the user is allowed to create, rename, close, and reopen forum topics; supergroups only
+	// Optional. True, if the user is allowed to create, rename, close, and reopen forum topics; for supergroups only
 	CanManageTopics bool `json:"can_manage_topics,omitempty"`
 	// Optional. Custom title for this user
 	CustomTitle string `json:"custom_title,omitempty"`
@@ -1208,12 +1414,12 @@ func (v ChatMemberAdministrator) MergeChatMember() MergedChatMember {
 		CanPromoteMembers:   v.CanPromoteMembers,
 		CanChangeInfo:       v.CanChangeInfo,
 		CanInviteUsers:      v.CanInviteUsers,
-		CanPostMessages:     v.CanPostMessages,
-		CanEditMessages:     v.CanEditMessages,
-		CanPinMessages:      v.CanPinMessages,
 		CanPostStories:      v.CanPostStories,
 		CanEditStories:      v.CanEditStories,
 		CanDeleteStories:    v.CanDeleteStories,
+		CanPostMessages:     v.CanPostMessages,
+		CanEditMessages:     v.CanEditMessages,
+		CanPinMessages:      v.CanPinMessages,
 		CanManageTopics:     v.CanManageTopics,
 		CustomTitle:         v.CustomTitle,
 	}
@@ -1537,7 +1743,7 @@ func (v *ChatMemberUpdated) UnmarshalJSON(b []byte) error {
 	t := tmp{}
 	err := json.Unmarshal(b, &t)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal ChatMemberUpdated JSON into tmp struct: %w", err)
 	}
 
 	v.Chat = t.Chat
@@ -1545,11 +1751,11 @@ func (v *ChatMemberUpdated) UnmarshalJSON(b []byte) error {
 	v.Date = t.Date
 	v.OldChatMember, err = unmarshalChatMember(t.OldChatMember)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal custom JSON field OldChatMember: %w", err)
 	}
 	v.NewChatMember, err = unmarshalChatMember(t.NewChatMember)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal custom JSON field NewChatMember: %w", err)
 	}
 	v.InviteLink = t.InviteLink
 	v.ViaChatFolderInviteLink = t.ViaChatFolderInviteLink
@@ -1607,12 +1813,18 @@ type ChatPhoto struct {
 
 // ChatShared (https://core.telegram.org/bots/api#chatshared)
 //
-// This object contains information about the chat whose identifier was shared with the bot using a KeyboardButtonRequestChat button.
+// This object contains information about a chat that was shared with the bot using a KeyboardButtonRequestChat button.
 type ChatShared struct {
-	// IDentifier of the request
+	// Identifier of the request
 	RequestID int64 `json:"request_id"`
-	// IDentifier of the shared chat. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a 64-bit integer or double-precision float type are safe for storing this identifier. The bot may not have access to the chat and could be unable to use this identifier, unless the chat is already known to the bot by some other means.
+	// Identifier of the shared chat. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a 64-bit integer or double-precision float type are safe for storing this identifier. The bot may not have access to the chat and could be unable to use this identifier, unless the chat is already known to the bot by some other means.
 	ChatID int64 `json:"chat_id"`
+	// Optional. Title of the chat, if the title was requested by the bot.
+	Title string `json:"title,omitempty"`
+	// Optional. Username of the chat, if the username was requested by the bot and available.
+	Username string `json:"username,omitempty"`
+	// Optional. Available sizes of the chat photo, if the photo was requested by the bot
+	Photo []PhotoSize `json:"photo,omitempty"`
 }
 
 // ChosenInlineResult (https://core.telegram.org/bots/api#choseninlineresult)
@@ -1626,7 +1838,7 @@ type ChosenInlineResult struct {
 	From User `json:"from"`
 	// Optional. Sender location, only for bots that require user location
 	Location *Location `json:"location,omitempty"`
-	// Optional. IDentifier of the sent inline message. Available only if there is an inline keyboard attached to the message. Will be also received in callback queries and can be used to edit the message.
+	// Optional. Identifier of the sent inline message. Available only if there is an inline keyboard attached to the message. Will be also received in callback queries and can be used to edit the message.
 	InlineMessageID string `json:"inline_message_id,omitempty"`
 	// The query that was used to obtain the result
 	Query string `json:"query"`
@@ -1662,7 +1874,7 @@ type Dice struct {
 //
 // This object represents a general file (as opposed to photos, voice messages and audio files).
 type Document struct {
-	// IDentifier for this file, which can be used to download or reuse the file
+	// Identifier for this file, which can be used to download or reuse the file
 	FileID string `json:"file_id"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
 	FileUniqueID string `json:"file_unique_id"`
@@ -1694,21 +1906,21 @@ type EncryptedCredentials struct {
 type EncryptedPassportElement struct {
 	// Element type. One of "personal_details", "passport", "driver_license", "identity_card", "internal_passport", "address", "utility_bill", "bank_statement", "rental_agreement", "passport_registration", "temporary_registration", "phone_number", "email".
 	Type string `json:"type"`
-	// Optional. Base64-encoded encrypted Telegram Passport element data provided by the user, available for "personal_details", "passport", "driver_license", "identity_card", "internal_passport" and "address" types. Can be decrypted and verified using the accompanying EncryptedCredentials.
+	// Optional. Base64-encoded encrypted Telegram Passport element data provided by the user; available only for "personal_details", "passport", "driver_license", "identity_card", "internal_passport" and "address" types. Can be decrypted and verified using the accompanying EncryptedCredentials.
 	Data string `json:"data,omitempty"`
-	// Optional. User's verified phone number, available only for "phone_number" type
+	// Optional. User's verified phone number; available only for "phone_number" type
 	PhoneNumber string `json:"phone_number,omitempty"`
-	// Optional. User's verified email address, available only for "email" type
+	// Optional. User's verified email address; available only for "email" type
 	Email string `json:"email,omitempty"`
-	// Optional. Array of encrypted files with documents provided by the user, available for "utility_bill", "bank_statement", "rental_agreement", "passport_registration" and "temporary_registration" types. Files can be decrypted and verified using the accompanying EncryptedCredentials.
+	// Optional. Array of encrypted files with documents provided by the user; available only for "utility_bill", "bank_statement", "rental_agreement", "passport_registration" and "temporary_registration" types. Files can be decrypted and verified using the accompanying EncryptedCredentials.
 	Files []PassportFile `json:"files,omitempty"`
-	// Optional. Encrypted file with the front side of the document, provided by the user. Available for "passport", "driver_license", "identity_card" and "internal_passport". The file can be decrypted and verified using the accompanying EncryptedCredentials.
+	// Optional. Encrypted file with the front side of the document, provided by the user; available only for "passport", "driver_license", "identity_card" and "internal_passport". The file can be decrypted and verified using the accompanying EncryptedCredentials.
 	FrontSide *PassportFile `json:"front_side,omitempty"`
-	// Optional. Encrypted file with the reverse side of the document, provided by the user. Available for "driver_license" and "identity_card". The file can be decrypted and verified using the accompanying EncryptedCredentials.
+	// Optional. Encrypted file with the reverse side of the document, provided by the user; available only for "driver_license" and "identity_card". The file can be decrypted and verified using the accompanying EncryptedCredentials.
 	ReverseSide *PassportFile `json:"reverse_side,omitempty"`
-	// Optional. Encrypted file with the selfie of the user holding a document, provided by the user; available for "passport", "driver_license", "identity_card" and "internal_passport". The file can be decrypted and verified using the accompanying EncryptedCredentials.
+	// Optional. Encrypted file with the selfie of the user holding a document, provided by the user; available if requested for "passport", "driver_license", "identity_card" and "internal_passport". The file can be decrypted and verified using the accompanying EncryptedCredentials.
 	Selfie *PassportFile `json:"selfie,omitempty"`
-	// Optional. Array of encrypted files with translated versions of documents provided by the user. Available if requested for "passport", "driver_license", "identity_card", "internal_passport", "utility_bill", "bank_statement", "rental_agreement", "passport_registration" and "temporary_registration" types. Files can be decrypted and verified using the accompanying EncryptedCredentials.
+	// Optional. Array of encrypted files with translated versions of documents provided by the user; available if requested for "passport", "driver_license", "identity_card", "internal_passport", "utility_bill", "bank_statement", "rental_agreement", "passport_registration" and "temporary_registration" types. Files can be decrypted and verified using the accompanying EncryptedCredentials.
 	Translation []PassportFile `json:"translation,omitempty"`
 	// Base64-encoded element hash for using in PassportElementErrorUnspecified
 	Hash string `json:"hash"`
@@ -1797,12 +2009,12 @@ func (v *ExternalReplyInfo) UnmarshalJSON(b []byte) error {
 	t := tmp{}
 	err := json.Unmarshal(b, &t)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal ExternalReplyInfo JSON into tmp struct: %w", err)
 	}
 
 	v.Origin, err = unmarshalMessageOrigin(t.Origin)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal custom JSON field Origin: %w", err)
 	}
 	v.Chat = t.Chat
 	v.MessageID = t.MessageID
@@ -1834,7 +2046,7 @@ func (v *ExternalReplyInfo) UnmarshalJSON(b []byte) error {
 //
 // This object represents a file ready to be downloaded. The file can be downloaded via the link https://api.telegram.org/file/bot<token>/<file_path>. It is guaranteed that the link will be valid for at least 1 hour. When the link expires, a new one can be requested by calling getFile.
 type File struct {
-	// IDentifier for this file, which can be used to download or reuse the file
+	// Identifier for this file, which can be used to download or reuse the file
 	FileID string `json:"file_id"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
 	FileUniqueID string `json:"file_unique_id"`
@@ -1852,7 +2064,7 @@ type ForceReply struct {
 	ForceReply bool `json:"force_reply"`
 	// Optional. The placeholder to be shown in the input field when the reply is active; 1-64 characters
 	InputFieldPlaceholder string `json:"input_field_placeholder,omitempty"`
-	// Optional. Use this parameter if you want to force reply from specific users only. Targets: 1) users that are @mentioned in the text of the Message object; 2) if the bot's message is a reply (has reply_to_message_id), sender of the original message.
+	// Optional. Use this parameter if you want to force reply from specific users only. Targets: 1) users that are @mentioned in the text of the Message object; 2) if the bot's message is a reply to a message in the same chat and forum topic, sender of the original message.
 	Selective bool `json:"selective,omitempty"`
 }
 
@@ -1990,7 +2202,7 @@ type GiveawayCreated struct{}
 type GiveawayWinners struct {
 	// The chat that created the giveaway
 	Chat Chat `json:"chat"`
-	// IDentifier of the messsage with the giveaway in the chat
+	// Identifier of the message with the giveaway in the chat
 	GiveawayMessageID int64 `json:"giveaway_message_id"`
 	// Point in time (Unix timestamp) when winners of the giveaway were selected
 	WinnersSelectionDate int64 `json:"winners_selection_date"`
@@ -2048,7 +2260,7 @@ func (v InaccessibleMessage) maybeInaccessibleMessage() {}
 type InlineKeyboardButton struct {
 	// Label text on the button
 	Text string `json:"text"`
-	// Optional. HTTP or tg:// URL to be opened when the button is pressed. Links tg://user?id=<user_id> can be used to mention a user by their ID without using a username, if this is allowed by their privacy settings.
+	// Optional. HTTP or tg:// URL to be opened when the button is pressed. Links tg://user?id=<user_id> can be used to mention a user by their identifier without using a username, if this is allowed by their privacy settings.
 	Url string `json:"url,omitempty"`
 	// Optional. Data to be sent in a callback query to the bot when button is pressed, 1-64 bytes
 	CallbackData string `json:"callback_data,omitempty"`
@@ -2071,7 +2283,6 @@ type InlineKeyboardButton struct {
 // InlineKeyboardMarkup (https://core.telegram.org/bots/api#inlinekeyboardmarkup)
 //
 // This object represents an inline keyboard that appears right next to the message it belongs to.
-// Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will display unsupported message.
 type InlineKeyboardMarkup struct {
 	// Array of button rows, each represented by an Array of InlineKeyboardButton objects
 	InlineKeyboard [][]InlineKeyboardButton `json:"inline_keyboard,omitempty"`
@@ -2126,10 +2337,10 @@ type InlineQuery struct {
 type InlineQueryResult interface {
 	GetType() string
 	GetID() string
-	// inlineQueryResult exists to avoid external types implementing this interface.
-	inlineQueryResult()
 	// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with complex telegram types in a non-generic world.
 	MergeInlineQueryResult() MergedInlineQueryResult
+	// inlineQueryResult exists to avoid external types implementing this interface.
+	inlineQueryResult()
 }
 
 // Ensure that all subtypes correctly implement the parent interface.
@@ -2372,7 +2583,6 @@ func (v InlineQueryResultArticle) inlineQueryResult() {}
 // InlineQueryResultAudio (https://core.telegram.org/bots/api#inlinequeryresultaudio)
 //
 // Represents a link to an MP3 audio file. By default, this audio file will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the audio.
-// Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
 type InlineQueryResultAudio struct {
 	// Unique identifier for this result, 1-64 bytes
 	ID string `json:"id"`
@@ -2442,7 +2652,6 @@ func (v InlineQueryResultAudio) inlineQueryResult() {}
 // InlineQueryResultCachedAudio (https://core.telegram.org/bots/api#inlinequeryresultcachedaudio)
 //
 // Represents a link to an MP3 audio file stored on the Telegram servers. By default, this audio file will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the audio.
-// Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
 type InlineQueryResultCachedAudio struct {
 	// Unique identifier for this result, 1-64 bytes
 	ID string `json:"id"`
@@ -2503,7 +2712,6 @@ func (v InlineQueryResultCachedAudio) inlineQueryResult() {}
 // InlineQueryResultCachedDocument (https://core.telegram.org/bots/api#inlinequeryresultcacheddocument)
 //
 // Represents a link to a file stored on the Telegram servers. By default, this file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the file.
-// Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
 type InlineQueryResultCachedDocument struct {
 	// Unique identifier for this result, 1-64 bytes
 	ID string `json:"id"`
@@ -2762,7 +2970,6 @@ func (v InlineQueryResultCachedPhoto) inlineQueryResult() {}
 // InlineQueryResultCachedSticker (https://core.telegram.org/bots/api#inlinequeryresultcachedsticker)
 //
 // Represents a link to a sticker stored on the Telegram servers. By default, this sticker will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the sticker.
-// Note: This will only work in Telegram versions released after 9 April, 2016 for static stickers and after 06 July, 2019 for animated stickers. Older clients will ignore them.
 type InlineQueryResultCachedSticker struct {
 	// Unique identifier for this result, 1-64 bytes
 	ID string `json:"id"`
@@ -2880,7 +3087,6 @@ func (v InlineQueryResultCachedVideo) inlineQueryResult() {}
 // InlineQueryResultCachedVoice (https://core.telegram.org/bots/api#inlinequeryresultcachedvoice)
 //
 // Represents a link to a voice message stored on the Telegram servers. By default, this voice message will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the voice message.
-// Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
 type InlineQueryResultCachedVoice struct {
 	// Unique identifier for this result, 1-64 bytes
 	ID string `json:"id"`
@@ -2944,7 +3150,6 @@ func (v InlineQueryResultCachedVoice) inlineQueryResult() {}
 // InlineQueryResultContact (https://core.telegram.org/bots/api#inlinequeryresultcontact)
 //
 // Represents a contact with a phone number. By default, this contact will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the contact.
-// Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
 type InlineQueryResultContact struct {
 	// Unique identifier for this result, 1-64 Bytes
 	ID string `json:"id"`
@@ -3014,7 +3219,6 @@ func (v InlineQueryResultContact) inlineQueryResult() {}
 // InlineQueryResultDocument (https://core.telegram.org/bots/api#inlinequeryresultdocument)
 //
 // Represents a link to a file. By default, this file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the file. Currently, only .PDF and .ZIP files can be sent using this method.
-// Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
 type InlineQueryResultDocument struct {
 	// Unique identifier for this result, 1-64 bytes
 	ID string `json:"id"`
@@ -3093,7 +3297,6 @@ func (v InlineQueryResultDocument) inlineQueryResult() {}
 // InlineQueryResultGame (https://core.telegram.org/bots/api#inlinequeryresultgame)
 //
 // Represents a Game.
-// Note: This will only work in Telegram versions released after October 1, 2016. Older clients will not display any inline results if a game result is among them.
 type InlineQueryResultGame struct {
 	// Unique identifier for this result, 1-64 bytes
 	ID string `json:"id"`
@@ -3220,7 +3423,6 @@ func (v InlineQueryResultGif) inlineQueryResult() {}
 // InlineQueryResultLocation (https://core.telegram.org/bots/api#inlinequeryresultlocation)
 //
 // Represents a location on a map. By default, the location will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the location.
-// Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
 type InlineQueryResultLocation struct {
 	// Unique identifier for this result, 1-64 Bytes
 	ID string `json:"id"`
@@ -3452,7 +3654,6 @@ func (v InlineQueryResultPhoto) inlineQueryResult() {}
 // InlineQueryResultVenue (https://core.telegram.org/bots/api#inlinequeryresultvenue)
 //
 // Represents a venue. By default, the venue will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the venue.
-// Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
 type InlineQueryResultVenue struct {
 	// Unique identifier for this result, 1-64 Bytes
 	ID string `json:"id"`
@@ -3615,7 +3816,6 @@ func (v InlineQueryResultVideo) inlineQueryResult() {}
 // InlineQueryResultVoice (https://core.telegram.org/bots/api#inlinequeryresultvoice)
 //
 // Represents a link to a voice recording in an .OGG container encoded with OPUS. By default, this voice recording will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the the voice message.
-// Note: This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore them.
 type InlineQueryResultVoice struct {
 	// Unique identifier for this result, 1-64 bytes
 	ID string `json:"id"`
@@ -3794,12 +3994,12 @@ func (v InputLocationMessageContent) inputMessageContent() {}
 type InputMedia interface {
 	GetType() string
 	GetMedia() InputFile
-	// inputMedia exists to avoid external types implementing this interface.
-	inputMedia()
 	// InputParams allows for uploading attachments with files.
 	InputParams(string, map[string]NamedReader) ([]byte, error)
 	// MergeInputMedia returns a MergedInputMedia struct to simplify working with complex telegram types in a non-generic world.
 	MergeInputMedia() MergedInputMedia
+	// inputMedia exists to avoid external types implementing this interface.
+	inputMedia()
 }
 
 // Ensure that all subtypes correctly implement the parent interface.
@@ -4308,6 +4508,8 @@ var (
 type InputSticker struct {
 	// The added sticker. Pass a file_id as a String to send a file that already exists on the Telegram servers, pass an HTTP URL as a String for Telegram to get a file from the Internet, upload a new one using multipart/form-data, or pass "attach://<file_attach_name>" to upload a new one using multipart/form-data under <file_attach_name> name. Animated and video stickers can't be uploaded via HTTP URL. More information on Sending Files: https://core.telegram.org/bots/api#sending-files
 	Sticker InputFile `json:"sticker"`
+	// Format of the added sticker, must be one of "static" for a .WEBP or .PNG image, "animated" for a .TGS animation, "video" for a WEBM video
+	Format string `json:"format"`
 	// List of 1-20 emoji associated with the sticker
 	EmojiList []string `json:"emoji_list,omitempty"`
 	// Optional. Position where the mask should be placed on faces. For "mask" stickers only.
@@ -4398,15 +4600,12 @@ type Invoice struct {
 
 // KeyboardButton (https://core.telegram.org/bots/api#keyboardbutton)
 //
-// This object represents one button of the reply keyboard. For simple text buttons, String can be used instead of this object to specify the button text. The optional fields web_app, request_user, request_chat, request_contact, request_location, and request_poll are mutually exclusive.
-// Note: request_contact and request_location options will only work in Telegram versions released after 9 April, 2016. Older clients will display unsupported message.
-// Note: request_poll option will only work in Telegram versions released after 23 January, 2020. Older clients will display unsupported message.
-// Note: web_app option will only work in Telegram versions released after 16 April, 2022. Older clients will display unsupported message.
-// Note: request_user and request_chat options will only work in Telegram versions released after 3 February, 2023. Older clients will display unsupported message.
+// This object represents one button of the reply keyboard. For simple text buttons, String can be used instead of this object to specify the button text. The optional fields web_app, request_users, request_chat, request_contact, request_location, and request_poll are mutually exclusive.
+// Note: request_users and request_chat options will only work in Telegram versions released after 3 February, 2023. Older clients will display unsupported message.
 type KeyboardButton struct {
 	// Text of the button. If none of the optional fields are used, it will be sent as a message when the button is pressed
 	Text string `json:"text"`
-	// Optional. If specified, pressing the button will open a list of suitable users. IDentifiers of selected users will be sent to the bot in a "users_shared" service message. Available in private chats only.
+	// Optional. If specified, pressing the button will open a list of suitable users. Identifiers of selected users will be sent to the bot in a "users_shared" service message. Available in private chats only.
 	RequestUsers *KeyboardButtonRequestUsers `json:"request_users,omitempty"`
 	// Optional. If specified, pressing the button will open a list of suitable chats. Tapping on a chat will send its identifier to the bot in a "chat_shared" service message. Available in private chats only.
 	RequestChat *KeyboardButtonRequestChat `json:"request_chat,omitempty"`
@@ -4430,7 +4629,7 @@ type KeyboardButtonPollType struct {
 
 // KeyboardButtonRequestChat (https://core.telegram.org/bots/api#keyboardbuttonrequestchat)
 //
-// This object defines the criteria used to request a suitable chat. The identifier of the selected chat will be shared with the bot when the corresponding button is pressed. More about requesting chats: https://core.telegram.org/bots/features#chat-and-user-selection
+// This object defines the criteria used to request a suitable chat. Information about the selected chat will be shared with the bot when the corresponding button is pressed. The bot will be granted requested rights in the сhat if appropriate More about requesting chats: https://core.telegram.org/bots/features#chat-and-user-selection
 type KeyboardButtonRequestChat struct {
 	// Signed 32-bit identifier of the request, which will be received back in the ChatShared object. Must be unique within the message
 	RequestID int64 `json:"request_id"`
@@ -4448,11 +4647,17 @@ type KeyboardButtonRequestChat struct {
 	BotAdministratorRights *ChatAdministratorRights `json:"bot_administrator_rights,omitempty"`
 	// Optional. Pass True to request a chat with the bot as a member. Otherwise, no additional restrictions are applied.
 	BotIsMember bool `json:"bot_is_member,omitempty"`
+	// Optional. Pass True to request the chat's title
+	RequestTitle bool `json:"request_title,omitempty"`
+	// Optional. Pass True to request the chat's username
+	RequestUsername bool `json:"request_username,omitempty"`
+	// Optional. Pass True to request the chat's photo
+	RequestPhoto bool `json:"request_photo,omitempty"`
 }
 
 // KeyboardButtonRequestUsers (https://core.telegram.org/bots/api#keyboardbuttonrequestusers)
 //
-// This object defines the criteria used to request suitable users. The identifiers of the selected users will be shared with the bot when the corresponding button is pressed. More about requesting users: https://core.telegram.org/bots/features#chat-and-user-selection
+// This object defines the criteria used to request suitable users. Information about the selected users will be shared with the bot when the corresponding button is pressed. More about requesting users: https://core.telegram.org/bots/features#chat-and-user-selection
 type KeyboardButtonRequestUsers struct {
 	// Signed 32-bit identifier of the request that will be received back in the UsersShared object. Must be unique within the message
 	RequestID int64 `json:"request_id"`
@@ -4462,6 +4667,12 @@ type KeyboardButtonRequestUsers struct {
 	UserIsPremium *bool `json:"user_is_premium,omitempty"`
 	// Optional. The maximum number of users to be selected; 1-10. Defaults to 1.
 	MaxQuantity int64 `json:"max_quantity,omitempty"`
+	// Optional. Pass True to request the users' first and last name
+	RequestName bool `json:"request_name,omitempty"`
+	// Optional. Pass True to request the users' username
+	RequestUsername bool `json:"request_username,omitempty"`
+	// Optional. Pass True to request the users' photo
+	RequestPhoto bool `json:"request_photo,omitempty"`
 }
 
 // LabeledPrice (https://core.telegram.org/bots/api#labeledprice)
@@ -4482,9 +4693,9 @@ type LinkPreviewOptions struct {
 	IsDisabled bool `json:"is_disabled,omitempty"`
 	// Optional. URL to use for the link preview. If empty, then the first URL found in the message text will be used
 	Url string `json:"url,omitempty"`
-	// Optional. True, if the media in the link preview is suppposed to be shrunk; ignored if the URL isn't explicitly specified or media size change isn't supported for the preview
+	// Optional. True, if the media in the link preview is supposed to be shrunk; ignored if the URL isn't explicitly specified or media size change isn't supported for the preview
 	PreferSmallMedia bool `json:"prefer_small_media,omitempty"`
-	// Optional. True, if the media in the link preview is suppposed to be enlarged; ignored if the URL isn't explicitly specified or media size change isn't supported for the preview
+	// Optional. True, if the media in the link preview is supposed to be enlarged; ignored if the URL isn't explicitly specified or media size change isn't supported for the preview
 	PreferLargeMedia bool `json:"prefer_large_media,omitempty"`
 	// Optional. True, if the link preview must be shown above the message text; otherwise, the link preview will be shown below the message text
 	ShowAboveText bool `json:"show_above_text,omitempty"`
@@ -4494,10 +4705,10 @@ type LinkPreviewOptions struct {
 //
 // This object represents a point on the map.
 type Location struct {
-	// Longitude as defined by sender
-	Longitude float64 `json:"longitude"`
 	// Latitude as defined by sender
 	Latitude float64 `json:"latitude"`
+	// Longitude as defined by sender
+	Longitude float64 `json:"longitude"`
 	// Optional. The radius of uncertainty for the location, measured in meters; 0-1500
 	HorizontalAccuracy float64 `json:"horizontal_accuracy,omitempty"`
 	// Optional. Time relative to the message sending date, during which the location can be updated; in seconds. For active live locations only.
@@ -4548,6 +4759,32 @@ type MaybeInaccessibleMessage interface {
 	GetChat() Chat
 	// maybeInaccessibleMessage exists to avoid external types implementing this interface.
 	maybeInaccessibleMessage()
+
+	// Helper methods shared across all subtypes of this interface.
+	// Copy Helper method for Bot.CopyMessage.
+	Copy(b *Bot, chatID int64, opts *CopyMessageOpts) (*MessageID, error)
+	// Delete Helper method for Bot.DeleteMessage.
+	Delete(b *Bot, opts *DeleteMessageOpts) (bool, error)
+	// EditCaption Helper method for Bot.EditMessageCaption.
+	EditCaption(b *Bot, opts *EditMessageCaptionOpts) (*Message, bool, error)
+	// EditLiveLocation Helper method for Bot.EditMessageLiveLocation.
+	EditLiveLocation(b *Bot, latitude float64, longitude float64, opts *EditMessageLiveLocationOpts) (*Message, bool, error)
+	// EditMedia Helper method for Bot.EditMessageMedia.
+	EditMedia(b *Bot, media InputMedia, opts *EditMessageMediaOpts) (*Message, bool, error)
+	// EditReplyMarkup Helper method for Bot.EditMessageReplyMarkup.
+	EditReplyMarkup(b *Bot, opts *EditMessageReplyMarkupOpts) (*Message, bool, error)
+	// EditText Helper method for Bot.EditMessageText.
+	EditText(b *Bot, text string, opts *EditMessageTextOpts) (*Message, bool, error)
+	// Forward Helper method for Bot.ForwardMessage.
+	Forward(b *Bot, chatID int64, opts *ForwardMessageOpts) (*Message, error)
+	// Pin Helper method for Bot.PinChatMessage.
+	Pin(b *Bot, opts *PinChatMessageOpts) (bool, error)
+	// SetReaction Helper method for Bot.SetMessageReaction.
+	SetReaction(b *Bot, opts *SetMessageReactionOpts) (bool, error)
+	// StopLiveLocation Helper method for Bot.StopMessageLiveLocation.
+	StopLiveLocation(b *Bot, opts *StopMessageLiveLocationOpts) (*Message, bool, error)
+	// Unpin Helper method for Bot.UnpinChatMessage.
+	Unpin(b *Bot, opts *UnpinChatMessageOpts) (bool, error)
 }
 
 // Ensure that all subtypes correctly implement the parent interface.
@@ -4566,10 +4803,10 @@ var (
 // If a menu button other than MenuButtonDefault is set for a private chat, then it is applied in the chat. Otherwise the default menu button is applied. By default, the menu button opens the list of bot commands.
 type MenuButton interface {
 	GetType() string
-	// menuButton exists to avoid external types implementing this interface.
-	menuButton()
 	// MergeMenuButton returns a MergedMenuButton struct to simplify working with complex telegram types in a non-generic world.
 	MergeMenuButton() MergedMenuButton
+	// menuButton exists to avoid external types implementing this interface.
+	menuButton()
 }
 
 // Ensure that all subtypes correctly implement the parent interface.
@@ -4605,17 +4842,21 @@ func (v MergedMenuButton) MergeMenuButton() MergedMenuButton {
 // unmarshalMenuButtonArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
 // using unmarshalMenuButton.
 func unmarshalMenuButtonArray(d json.RawMessage) ([]MenuButton, error) {
+	if len(d) == 0 {
+		return nil, nil
+	}
+
 	var ds []json.RawMessage
 	err := json.Unmarshal(d, &ds)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal initial MenuButton JSON into an array: %w", err)
 	}
 
 	var vs []MenuButton
-	for _, d := range ds {
+	for idx, d := range ds {
 		v, err := unmarshalMenuButton(d)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal MenuButton on array item %d: %w", idx, err)
 		}
 		vs = append(vs, v)
 	}
@@ -4635,7 +4876,7 @@ func unmarshalMenuButton(d json.RawMessage) (MenuButton, error) {
 	}{}
 	err := json.Unmarshal(d, &t)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal MenuButton for constant field 'Type': %w", err)
 	}
 
 	switch t.Type {
@@ -4643,7 +4884,7 @@ func unmarshalMenuButton(d json.RawMessage) (MenuButton, error) {
 		s := MenuButtonCommands{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal MenuButton for value 'commands': %w", err)
 		}
 		return s, nil
 
@@ -4651,7 +4892,7 @@ func unmarshalMenuButton(d json.RawMessage) (MenuButton, error) {
 		s := MenuButtonWebApp{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal MenuButton for value 'web_app': %w", err)
 		}
 		return s, nil
 
@@ -4659,12 +4900,12 @@ func unmarshalMenuButton(d json.RawMessage) (MenuButton, error) {
 		s := MenuButtonDefault{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal MenuButton for value 'default': %w", err)
 		}
 		return s, nil
 
 	}
-	return nil, fmt.Errorf("unknown interface with Type %v", t.Type)
+	return nil, fmt.Errorf("unknown interface for MenuButton with Type %v", t.Type)
 }
 
 // MenuButtonCommands (https://core.telegram.org/bots/api#menubuttoncommands)
@@ -4785,8 +5026,14 @@ type Message struct {
 	From *User `json:"from,omitempty"`
 	// Optional. Sender of the message, sent on behalf of a chat. For example, the channel itself for channel posts, the supergroup itself for messages from anonymous group administrators, the linked channel for messages automatically forwarded to the discussion group. For backward compatibility, the field from contains a fake sender user in non-channel chats, if the message was sent on behalf of a chat.
 	SenderChat *Chat `json:"sender_chat,omitempty"`
+	// Optional. If the sender of the message boosted the chat, the number of boosts added by the user
+	SenderBoostCount int64 `json:"sender_boost_count,omitempty"`
+	// Optional. The bot that actually sent the message on behalf of the business account. Available only for outgoing messages sent on behalf of the connected business account.
+	SenderBusinessBot *User `json:"sender_business_bot,omitempty"`
 	// Date the message was sent in Unix time. It is always a positive number, representing a valid date.
 	Date int64 `json:"date"`
+	// Optional. Unique identifier of the business connection from which the message was received. If non-empty, the message belongs to a chat of the corresponding business account that is independent from any potential bot chat which might share the same identifier.
+	BusinessConnectionID string `json:"business_connection_id,omitempty"`
 	// Chat the message belongs to
 	Chat Chat `json:"chat"`
 	// Optional. Information about the original message for forwarded messages
@@ -4801,12 +5048,16 @@ type Message struct {
 	ExternalReply *ExternalReplyInfo `json:"external_reply,omitempty"`
 	// Optional. For replies that quote part of the original message, the quoted part of the message
 	Quote *TextQuote `json:"quote,omitempty"`
+	// Optional. For replies to a story, the original story
+	ReplyToStory *Story `json:"reply_to_story,omitempty"`
 	// Optional. Bot through which the message was sent
 	ViaBot *User `json:"via_bot,omitempty"`
 	// Optional. Date the message was last edited in Unix time
 	EditDate int64 `json:"edit_date,omitempty"`
 	// Optional. True, if the message can't be forwarded
 	HasProtectedContent bool `json:"has_protected_content,omitempty"`
+	// Optional. True, if the message was sent by an implicit action, for example, as an away or a greeting business message, or as a scheduled message
+	IsFromOffline bool `json:"is_from_offline,omitempty"`
 	// Optional. The unique identifier of a media message group this message belongs to
 	MediaGroupID string `json:"media_group_id,omitempty"`
 	// Optional. Signature of the post author for messages in channels, or the custom title of an anonymous group administrator
@@ -4893,6 +5144,8 @@ type Message struct {
 	PassportData *PassportData `json:"passport_data,omitempty"`
 	// Optional. Service message. A user in the chat triggered another user's proximity alert while sharing Live Location.
 	ProximityAlertTriggered *ProximityAlertTriggered `json:"proximity_alert_triggered,omitempty"`
+	// Optional. Service message: user boosted the chat
+	BoostAdded *ChatBoostAdded `json:"boost_added,omitempty"`
 	// Optional. Service message: forum topic created
 	ForumTopicCreated *ForumTopicCreated `json:"forum_topic_created,omitempty"`
 	// Optional. Service message: forum topic edited
@@ -4935,7 +5188,10 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 		MessageThreadID               int64                          `json:"message_thread_id"`
 		From                          *User                          `json:"from"`
 		SenderChat                    *Chat                          `json:"sender_chat"`
+		SenderBoostCount              int64                          `json:"sender_boost_count"`
+		SenderBusinessBot             *User                          `json:"sender_business_bot"`
 		Date                          int64                          `json:"date"`
+		BusinessConnectionID          string                         `json:"business_connection_id"`
 		Chat                          Chat                           `json:"chat"`
 		ForwardOrigin                 json.RawMessage                `json:"forward_origin"`
 		IsTopicMessage                bool                           `json:"is_topic_message"`
@@ -4943,9 +5199,11 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 		ReplyToMessage                *Message                       `json:"reply_to_message"`
 		ExternalReply                 *ExternalReplyInfo             `json:"external_reply"`
 		Quote                         *TextQuote                     `json:"quote"`
+		ReplyToStory                  *Story                         `json:"reply_to_story"`
 		ViaBot                        *User                          `json:"via_bot"`
 		EditDate                      int64                          `json:"edit_date"`
 		HasProtectedContent           bool                           `json:"has_protected_content"`
+		IsFromOffline                 bool                           `json:"is_from_offline"`
 		MediaGroupID                  string                         `json:"media_group_id"`
 		AuthorSignature               string                         `json:"author_signature"`
 		Text                          string                         `json:"text"`
@@ -4989,6 +5247,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 		WriteAccessAllowed            *WriteAccessAllowed            `json:"write_access_allowed"`
 		PassportData                  *PassportData                  `json:"passport_data"`
 		ProximityAlertTriggered       *ProximityAlertTriggered       `json:"proximity_alert_triggered"`
+		BoostAdded                    *ChatBoostAdded                `json:"boost_added"`
 		ForumTopicCreated             *ForumTopicCreated             `json:"forum_topic_created"`
 		ForumTopicEdited              *ForumTopicEdited              `json:"forum_topic_edited"`
 		ForumTopicClosed              *ForumTopicClosed              `json:"forum_topic_closed"`
@@ -5009,27 +5268,32 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 	t := tmp{}
 	err := json.Unmarshal(b, &t)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal Message JSON into tmp struct: %w", err)
 	}
 
 	v.MessageID = t.MessageID
 	v.MessageThreadID = t.MessageThreadID
 	v.From = t.From
 	v.SenderChat = t.SenderChat
+	v.SenderBoostCount = t.SenderBoostCount
+	v.SenderBusinessBot = t.SenderBusinessBot
 	v.Date = t.Date
+	v.BusinessConnectionID = t.BusinessConnectionID
 	v.Chat = t.Chat
 	v.ForwardOrigin, err = unmarshalMessageOrigin(t.ForwardOrigin)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal custom JSON field ForwardOrigin: %w", err)
 	}
 	v.IsTopicMessage = t.IsTopicMessage
 	v.IsAutomaticForward = t.IsAutomaticForward
 	v.ReplyToMessage = t.ReplyToMessage
 	v.ExternalReply = t.ExternalReply
 	v.Quote = t.Quote
+	v.ReplyToStory = t.ReplyToStory
 	v.ViaBot = t.ViaBot
 	v.EditDate = t.EditDate
 	v.HasProtectedContent = t.HasProtectedContent
+	v.IsFromOffline = t.IsFromOffline
 	v.MediaGroupID = t.MediaGroupID
 	v.AuthorSignature = t.AuthorSignature
 	v.Text = t.Text
@@ -5066,7 +5330,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 	v.MigrateFromChatID = t.MigrateFromChatID
 	v.PinnedMessage, err = unmarshalMaybeInaccessibleMessage(t.PinnedMessage)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal custom JSON field PinnedMessage: %w", err)
 	}
 	v.Invoice = t.Invoice
 	v.SuccessfulPayment = t.SuccessfulPayment
@@ -5076,6 +5340,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 	v.WriteAccessAllowed = t.WriteAccessAllowed
 	v.PassportData = t.PassportData
 	v.ProximityAlertTriggered = t.ProximityAlertTriggered
+	v.BoostAdded = t.BoostAdded
 	v.ForumTopicCreated = t.ForumTopicCreated
 	v.ForumTopicEdited = t.ForumTopicEdited
 	v.ForumTopicClosed = t.ForumTopicClosed
@@ -5160,10 +5425,10 @@ type MessageID struct {
 type MessageOrigin interface {
 	GetType() string
 	GetDate() int64
-	// messageOrigin exists to avoid external types implementing this interface.
-	messageOrigin()
 	// MergeMessageOrigin returns a MergedMessageOrigin struct to simplify working with complex telegram types in a non-generic world.
 	MergeMessageOrigin() MergedMessageOrigin
+	// messageOrigin exists to avoid external types implementing this interface.
+	messageOrigin()
 }
 
 // Ensure that all subtypes correctly implement the parent interface.
@@ -5215,17 +5480,21 @@ func (v MergedMessageOrigin) MergeMessageOrigin() MergedMessageOrigin {
 // unmarshalMessageOriginArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
 // using unmarshalMessageOrigin.
 func unmarshalMessageOriginArray(d json.RawMessage) ([]MessageOrigin, error) {
+	if len(d) == 0 {
+		return nil, nil
+	}
+
 	var ds []json.RawMessage
 	err := json.Unmarshal(d, &ds)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal initial MessageOrigin JSON into an array: %w", err)
 	}
 
 	var vs []MessageOrigin
-	for _, d := range ds {
+	for idx, d := range ds {
 		v, err := unmarshalMessageOrigin(d)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal MessageOrigin on array item %d: %w", idx, err)
 		}
 		vs = append(vs, v)
 	}
@@ -5245,7 +5514,7 @@ func unmarshalMessageOrigin(d json.RawMessage) (MessageOrigin, error) {
 	}{}
 	err := json.Unmarshal(d, &t)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal MessageOrigin for constant field 'Type': %w", err)
 	}
 
 	switch t.Type {
@@ -5253,7 +5522,7 @@ func unmarshalMessageOrigin(d json.RawMessage) (MessageOrigin, error) {
 		s := MessageOriginUser{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal MessageOrigin for value 'user': %w", err)
 		}
 		return s, nil
 
@@ -5261,7 +5530,7 @@ func unmarshalMessageOrigin(d json.RawMessage) (MessageOrigin, error) {
 		s := MessageOriginHiddenUser{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal MessageOrigin for value 'hidden_user': %w", err)
 		}
 		return s, nil
 
@@ -5269,7 +5538,7 @@ func unmarshalMessageOrigin(d json.RawMessage) (MessageOrigin, error) {
 		s := MessageOriginChat{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal MessageOrigin for value 'chat': %w", err)
 		}
 		return s, nil
 
@@ -5277,12 +5546,12 @@ func unmarshalMessageOrigin(d json.RawMessage) (MessageOrigin, error) {
 		s := MessageOriginChannel{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal MessageOrigin for value 'channel': %w", err)
 		}
 		return s, nil
 
 	}
-	return nil, fmt.Errorf("unknown interface with Type %v", t.Type)
+	return nil, fmt.Errorf("unknown interface for MessageOrigin with Type %v", t.Type)
 }
 
 // MessageOriginChannel (https://core.telegram.org/bots/api#messageoriginchannel)
@@ -5508,6 +5777,41 @@ type MessageReactionUpdated struct {
 	NewReaction []ReactionType `json:"new_reaction,omitempty"`
 }
 
+// UnmarshalJSON is a custom JSON unmarshaller to use the helpers which allow for unmarshalling structs into interfaces.
+func (v *MessageReactionUpdated) UnmarshalJSON(b []byte) error {
+	// All fields in MessageReactionUpdated, with interface fields as json.RawMessage
+	type tmp struct {
+		Chat        Chat            `json:"chat"`
+		MessageID   int64           `json:"message_id"`
+		User        *User           `json:"user"`
+		ActorChat   *Chat           `json:"actor_chat"`
+		Date        int64           `json:"date"`
+		OldReaction json.RawMessage `json:"old_reaction"`
+		NewReaction json.RawMessage `json:"new_reaction"`
+	}
+	t := tmp{}
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal MessageReactionUpdated JSON into tmp struct: %w", err)
+	}
+
+	v.Chat = t.Chat
+	v.MessageID = t.MessageID
+	v.User = t.User
+	v.ActorChat = t.ActorChat
+	v.Date = t.Date
+	v.OldReaction, err = unmarshalReactionTypeArray(t.OldReaction)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal custom JSON field OldReaction: %w", err)
+	}
+	v.NewReaction, err = unmarshalReactionTypeArray(t.NewReaction)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal custom JSON field NewReaction: %w", err)
+	}
+
+	return nil
+}
+
 // OrderInfo (https://core.telegram.org/bots/api#orderinfo)
 //
 // This object represents information about an order.
@@ -5548,10 +5852,10 @@ type PassportElementError interface {
 	GetSource() string
 	GetType() string
 	GetMessage() string
-	// passportElementError exists to avoid external types implementing this interface.
-	passportElementError()
 	// MergePassportElementError returns a MergedPassportElementError struct to simplify working with complex telegram types in a non-generic world.
 	MergePassportElementError() MergedPassportElementError
+	// passportElementError exists to avoid external types implementing this interface.
+	passportElementError()
 }
 
 // Ensure that all subtypes correctly implement the parent interface.
@@ -6094,7 +6398,7 @@ func (v PassportElementErrorUnspecified) passportElementError() {}
 //
 // This object represents a file uploaded to Telegram Passport. Currently all Telegram Passport files are in JPEG format when decrypted and don't exceed 10MB.
 type PassportFile struct {
-	// IDentifier for this file, which can be used to download or reuse the file
+	// Identifier for this file, which can be used to download or reuse the file
 	FileID string `json:"file_id"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
 	FileUniqueID string `json:"file_unique_id"`
@@ -6108,7 +6412,7 @@ type PassportFile struct {
 //
 // This object represents one size of a photo or a file / sticker thumbnail.
 type PhotoSize struct {
-	// IDentifier for this file, which can be used to download or reuse the file
+	// Identifier for this file, which can be used to download or reuse the file
 	FileID string `json:"file_id"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
 	FileUniqueID string `json:"file_unique_id"`
@@ -6190,7 +6494,7 @@ type PreCheckoutQuery struct {
 	TotalAmount int64 `json:"total_amount"`
 	// Bot specified invoice payload
 	InvoicePayload string `json:"invoice_payload"`
-	// Optional. IDentifier of the shipping option chosen by the user
+	// Optional. Identifier of the shipping option chosen by the user
 	ShippingOptionID string `json:"shipping_option_id,omitempty"`
 	// Optional. Order information provided by the user
 	OrderInfo *OrderInfo `json:"order_info,omitempty"`
@@ -6228,12 +6532,12 @@ func (v *ReactionCount) UnmarshalJSON(b []byte) error {
 	t := tmp{}
 	err := json.Unmarshal(b, &t)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal ReactionCount JSON into tmp struct: %w", err)
 	}
 
 	v.Type, err = unmarshalReactionType(t.Type)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal custom JSON field Type: %w", err)
 	}
 	v.TotalCount = t.TotalCount
 
@@ -6247,10 +6551,10 @@ func (v *ReactionCount) UnmarshalJSON(b []byte) error {
 //   - ReactionTypeCustomEmoji
 type ReactionType interface {
 	GetType() string
-	// reactionType exists to avoid external types implementing this interface.
-	reactionType()
 	// MergeReactionType returns a MergedReactionType struct to simplify working with complex telegram types in a non-generic world.
 	MergeReactionType() MergedReactionType
+	// reactionType exists to avoid external types implementing this interface.
+	reactionType()
 }
 
 // Ensure that all subtypes correctly implement the parent interface.
@@ -6266,7 +6570,7 @@ type MergedReactionType struct {
 	// Optional. Reaction emoji. Currently, it can be one of "👍", "👎", "❤", "🔥", "🥰", "👏", "😁", "🤔", "🤯", "😱", "🤬", "😢", "🎉", "🤩", "🤮", "💩", "🙏", "👌", "🕊", "🤡", "🥱", "🥴", "😍", "🐳", "❤‍🔥", "🌚", "🌭", "💯", "🤣", "⚡", "🍌", "🏆", "💔", "🤨", "😐", "🍓", "🍾", "💋", "🖕", "😈", "😴", "😭", "🤓", "👻", "👨‍💻", "👀", "🎃", "🙈", "😇", "😨", "🤝", "✍", "🤗", "🫡", "🎅", "🎄", "☃", "💅", "🤪", "🗿", "🆒", "💘", "🙉", "🦄", "😘", "💊", "🙊", "😎", "👾", "🤷‍♂", "🤷", "🤷‍♀", "😡" (Only for emoji)
 	Emoji string `json:"emoji,omitempty"`
 	// Optional. Custom emoji identifier (Only for custom_emoji)
-	CustomEmoji string `json:"custom_emoji,omitempty"`
+	CustomEmojiID string `json:"custom_emoji_id,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -6285,17 +6589,21 @@ func (v MergedReactionType) MergeReactionType() MergedReactionType {
 // unmarshalReactionTypeArray is a JSON unmarshalling helper which allows unmarshalling an array of interfaces
 // using unmarshalReactionType.
 func unmarshalReactionTypeArray(d json.RawMessage) ([]ReactionType, error) {
+	if len(d) == 0 {
+		return nil, nil
+	}
+
 	var ds []json.RawMessage
 	err := json.Unmarshal(d, &ds)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal initial ReactionType JSON into an array: %w", err)
 	}
 
 	var vs []ReactionType
-	for _, d := range ds {
+	for idx, d := range ds {
 		v, err := unmarshalReactionType(d)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal ReactionType on array item %d: %w", idx, err)
 		}
 		vs = append(vs, v)
 	}
@@ -6315,7 +6623,7 @@ func unmarshalReactionType(d json.RawMessage) (ReactionType, error) {
 	}{}
 	err := json.Unmarshal(d, &t)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal ReactionType for constant field 'Type': %w", err)
 	}
 
 	switch t.Type {
@@ -6323,7 +6631,7 @@ func unmarshalReactionType(d json.RawMessage) (ReactionType, error) {
 		s := ReactionTypeEmoji{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal ReactionType for value 'emoji': %w", err)
 		}
 		return s, nil
 
@@ -6331,12 +6639,12 @@ func unmarshalReactionType(d json.RawMessage) (ReactionType, error) {
 		s := ReactionTypeCustomEmoji{}
 		err := json.Unmarshal(d, &s)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to unmarshal ReactionType for value 'custom_emoji': %w", err)
 		}
 		return s, nil
 
 	}
-	return nil, fmt.Errorf("unknown interface with Type %v", t.Type)
+	return nil, fmt.Errorf("unknown interface for ReactionType with Type %v", t.Type)
 }
 
 // ReactionTypeCustomEmoji (https://core.telegram.org/bots/api#reactiontypecustomemoji)
@@ -6344,7 +6652,7 @@ func unmarshalReactionType(d json.RawMessage) (ReactionType, error) {
 // The reaction is based on a custom emoji.
 type ReactionTypeCustomEmoji struct {
 	// Custom emoji identifier
-	CustomEmoji string `json:"custom_emoji"`
+	CustomEmojiID string `json:"custom_emoji_id"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -6355,8 +6663,8 @@ func (v ReactionTypeCustomEmoji) GetType() string {
 // MergeReactionType returns a MergedReactionType struct to simplify working with types in a non-generic world.
 func (v ReactionTypeCustomEmoji) MergeReactionType() MergedReactionType {
 	return MergedReactionType{
-		Type:        "custom_emoji",
-		CustomEmoji: v.CustomEmoji,
+		Type:          "custom_emoji",
+		CustomEmojiID: v.CustomEmojiID,
 	}
 }
 
@@ -6427,7 +6735,7 @@ type ReplyKeyboardMarkup struct {
 	OneTimeKeyboard bool `json:"one_time_keyboard,omitempty"`
 	// Optional. The placeholder to be shown in the input field when the keyboard is active; 1-64 characters
 	InputFieldPlaceholder string `json:"input_field_placeholder,omitempty"`
-	// Optional. Use this parameter if you want to show the keyboard to specific users only. Targets: 1) users that are @mentioned in the text of the Message object; 2) if the bot's message is a reply (has reply_to_message_id), sender of the original message. Example: A user requests to change the bot's language, bot replies to the request with a keyboard to select the new language. Other users in the group don't see the keyboard.
+	// Optional. Use this parameter if you want to show the keyboard to specific users only. Targets: 1) users that are @mentioned in the text of the Message object; 2) if the bot's message is a reply to a message in the same chat and forum topic, sender of the original message. Example: A user requests to change the bot's language, bot replies to the request with a keyboard to select the new language. Other users in the group don't see the keyboard.
 	Selective bool `json:"selective,omitempty"`
 }
 
@@ -6440,7 +6748,7 @@ func (v ReplyKeyboardMarkup) replyMarkup() {}
 type ReplyKeyboardRemove struct {
 	// Requests clients to remove the custom keyboard (user will not be able to summon this keyboard; if you want to hide the keyboard from sight but keep it accessible, use one_time_keyboard in ReplyKeyboardMarkup)
 	RemoveKeyboard bool `json:"remove_keyboard"`
-	// Optional. Use this parameter if you want to remove the keyboard for specific users only. Targets: 1) users that are @mentioned in the text of the Message object; 2) if the bot's message is a reply (has reply_to_message_id), sender of the original message. Example: A user votes in a poll, bot returns confirmation message in reply to the vote and removes the keyboard for that user, while still showing the keyboard with poll options to users who haven't voted yet.
+	// Optional. Use this parameter if you want to remove the keyboard for specific users only. Targets: 1) users that are @mentioned in the text of the Message object; 2) if the bot's message is a reply to a message in the same chat and forum topic, sender of the original message. Example: A user votes in a poll, bot returns confirmation message in reply to the vote and removes the keyboard for that user, while still showing the keyboard with poll options to users who haven't voted yet.
 	Selective bool `json:"selective,omitempty"`
 }
 
@@ -6451,11 +6759,11 @@ func (v ReplyKeyboardRemove) replyMarkup() {}
 //
 // Describes reply parameters for the message that is being sent.
 type ReplyParameters struct {
-	// IDentifier of the message that will be replied to in the current chat, or in the chat chat_id if it is specified
+	// Identifier of the message that will be replied to in the current chat, or in the chat chat_id if it is specified
 	MessageID int64 `json:"message_id"`
-	// Optional. If the message to be replied to is from a different chat, unique identifier for the chat or username of the channel (in the format @channelusername)
+	// Optional. If the message to be replied to is from a different chat, unique identifier for the chat or username of the channel (in the format @channelusername). Not supported for messages sent on behalf of a business account.
 	ChatID int64 `json:"chat_id,omitempty"`
-	// Optional. Pass True if the message should be sent even if the specified message to be replied to is not found; can be used only for replies in the same chat and forum topic.
+	// Optional. Pass True if the message should be sent even if the specified message to be replied to is not found. Always False for replies in another chat or forum topic. Always True for messages sent on behalf of a business account.
 	AllowSendingWithoutReply bool `json:"allow_sending_without_reply,omitempty"`
 	// Optional. Quoted part of the message to be replied to; 0-1024 characters after entities parsing. The quote must be an exact substring of the message to be replied to, including bold, italic, underline, strikethrough, spoiler, and custom_emoji entities. The message will fail to send if the quote isn't found in the original message.
 	Quote string `json:"quote,omitempty"`
@@ -6481,8 +6789,24 @@ type ResponseParameters struct {
 //
 // Describes an inline message sent by a Web App on behalf of a user.
 type SentWebAppMessage struct {
-	// Optional. IDentifier of the sent inline message. Available only if there is an inline keyboard attached to the message.
+	// Optional. Identifier of the sent inline message. Available only if there is an inline keyboard attached to the message.
 	InlineMessageID string `json:"inline_message_id,omitempty"`
+}
+
+// SharedUser (https://core.telegram.org/bots/api#shareduser)
+//
+// This object contains information about a user that was shared with the bot using a KeyboardButtonRequestUser button.
+type SharedUser struct {
+	// Identifier of the shared user. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so 64-bit integers or double-precision float types are safe for storing these identifiers. The bot may not have access to the user and could be unable to use this identifier, unless the user is already known to the bot by some other means.
+	UserID int64 `json:"user_id"`
+	// Optional. First name of the user, if the name was requested by the bot
+	FirstName string `json:"first_name,omitempty"`
+	// Optional. Last name of the user, if the name was requested by the bot
+	LastName string `json:"last_name,omitempty"`
+	// Optional. Username of the user, if the username was requested by the bot
+	Username string `json:"username,omitempty"`
+	// Optional. Available sizes of the chat photo, if the photo was requested by the bot
+	Photo []PhotoSize `json:"photo,omitempty"`
 }
 
 // ShippingAddress (https://core.telegram.org/bots/api#shippingaddress)
@@ -6533,7 +6857,7 @@ type ShippingQuery struct {
 //
 // This object represents a sticker.
 type Sticker struct {
-	// IDentifier for this file, which can be used to download or reuse the file
+	// Identifier for this file, which can be used to download or reuse the file
 	FileID string `json:"file_id"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
 	FileUniqueID string `json:"file_unique_id"`
@@ -6575,10 +6899,6 @@ type StickerSet struct {
 	Title string `json:"title"`
 	// Type of stickers in the set, currently one of "regular", "mask", "custom_emoji"
 	StickerType string `json:"sticker_type"`
-	// True, if the sticker set contains animated stickers
-	IsAnimated bool `json:"is_animated"`
-	// True, if the sticker set contains video stickers
-	IsVideo bool `json:"is_video"`
 	// List of all set stickers
 	Stickers []Sticker `json:"stickers,omitempty"`
 	// Optional. Sticker set thumbnail in the .WEBP, .TGS, or .WEBM format
@@ -6587,8 +6907,13 @@ type StickerSet struct {
 
 // Story (https://core.telegram.org/bots/api#story)
 //
-// This object represents a message about a forwarded story in the chat. Currently holds no information.
-type Story struct{}
+// This object represents a story.
+type Story struct {
+	// Chat that posted the story
+	Chat Chat `json:"chat"`
+	// Unique identifier for the story in the chat
+	ID int64 `json:"id"`
+}
 
 // SuccessfulPayment (https://core.telegram.org/bots/api#successfulpayment)
 //
@@ -6600,7 +6925,7 @@ type SuccessfulPayment struct {
 	TotalAmount int64 `json:"total_amount"`
 	// Bot specified invoice payload
 	InvoicePayload string `json:"invoice_payload"`
-	// Optional. IDentifier of the shipping option chosen by the user
+	// Optional. Identifier of the shipping option chosen by the user
 	ShippingOptionID string `json:"shipping_option_id,omitempty"`
 	// Optional. Order information provided by the user
 	OrderInfo *OrderInfo `json:"order_info,omitempty"`
@@ -6645,19 +6970,27 @@ type TextQuote struct {
 // This object represents an incoming update.
 // At most one of the optional parameters can be present in any given update.
 type Update struct {
-	// The update's unique identifier. Update identifiers start from a certain positive number and increase sequentially. This ID becomes especially handy if you're using webhooks, since it allows you to ignore repeated updates or to restore the correct update sequence, should they get out of order. If there are no new updates for at least a week, then identifier of the next update will be chosen randomly instead of sequentially.
+	// The update's unique identifier. Update identifiers start from a certain positive number and increase sequentially. This identifier becomes especially handy if you're using webhooks, since it allows you to ignore repeated updates or to restore the correct update sequence, should they get out of order. If there are no new updates for at least a week, then identifier of the next update will be chosen randomly instead of sequentially.
 	UpdateID int64 `json:"update_id"`
 	// Optional. New incoming message of any kind - text, photo, sticker, etc.
 	Message *Message `json:"message,omitempty"`
-	// Optional. New version of a message that is known to the bot and was edited
+	// Optional. New version of a message that is known to the bot and was edited. This update may at times be triggered by changes to message fields that are either unavailable or not actively used by your bot.
 	EditedMessage *Message `json:"edited_message,omitempty"`
 	// Optional. New incoming channel post of any kind - text, photo, sticker, etc.
 	ChannelPost *Message `json:"channel_post,omitempty"`
-	// Optional. New version of a channel post that is known to the bot and was edited
+	// Optional. New version of a channel post that is known to the bot and was edited. This update may at times be triggered by changes to message fields that are either unavailable or not actively used by your bot.
 	EditedChannelPost *Message `json:"edited_channel_post,omitempty"`
+	// Optional. The bot was connected to or disconnected from a business account, or a user edited an existing connection with the bot
+	BusinessConnection *BusinessConnection `json:"business_connection,omitempty"`
+	// Optional. New non-service message from a connected business account
+	BusinessMessage *Message `json:"business_message,omitempty"`
+	// Optional. New version of a message from a connected business account
+	EditedBusinessMessage *Message `json:"edited_business_message,omitempty"`
+	// Optional. Messages were deleted from a connected business account
+	DeletedBusinessMessages *BusinessMessagesDeleted `json:"deleted_business_messages,omitempty"`
 	// Optional. A reaction to a message was changed by a user. The bot must be an administrator in the chat and must explicitly specify "message_reaction" in the list of allowed_updates to receive these updates. The update isn't received for reactions set by bots.
 	MessageReaction *MessageReactionUpdated `json:"message_reaction,omitempty"`
-	// Optional. Reactions to a message with anonymous reactions were changed. The bot must be an administrator in the chat and must explicitly specify "message_reaction_count" in the list of allowed_updates to receive these updates.
+	// Optional. Reactions to a message with anonymous reactions were changed. The bot must be an administrator in the chat and must explicitly specify "message_reaction_count" in the list of allowed_updates to receive these updates. The updates are grouped and can be sent with delay up to a few minutes.
 	MessageReactionCount *MessageReactionCountUpdated `json:"message_reaction_count,omitempty"`
 	// Optional. New incoming inline query
 	InlineQuery *InlineQuery `json:"inline_query,omitempty"`
@@ -6669,7 +7002,7 @@ type Update struct {
 	ShippingQuery *ShippingQuery `json:"shipping_query,omitempty"`
 	// Optional. New incoming pre-checkout query. Contains full information about checkout
 	PreCheckoutQuery *PreCheckoutQuery `json:"pre_checkout_query,omitempty"`
-	// Optional. New poll state. Bots receive only updates about stopped polls and polls, which are sent by the bot
+	// Optional. New poll state. Bots receive only updates about manually stopped polls and polls, which are sent by the bot
 	Poll *Poll `json:"poll,omitempty"`
 	// Optional. A user changed their answer in a non-anonymous poll. Bots receive new votes only in polls that were sent by the bot itself.
 	PollAnswer *PollAnswer `json:"poll_answer,omitempty"`
@@ -6711,6 +7044,8 @@ type User struct {
 	CanReadAllGroupMessages bool `json:"can_read_all_group_messages,omitempty"`
 	// Optional. True, if the bot supports inline queries. Returned only in getMe.
 	SupportsInlineQueries bool `json:"supports_inline_queries,omitempty"`
+	// Optional. True, if the bot can be connected to a Telegram Business account to receive its messages. Returned only in getMe.
+	CanConnectToBusiness bool `json:"can_connect_to_business,omitempty"`
 }
 
 // UserChatBoosts (https://core.telegram.org/bots/api#userchatboosts)
@@ -6735,10 +7070,10 @@ type UserProfilePhotos struct {
 //
 // This object contains information about the users whose identifiers were shared with the bot using a KeyboardButtonRequestUsers button.
 type UsersShared struct {
-	// IDentifier of the request
+	// Identifier of the request
 	RequestID int64 `json:"request_id"`
-	// IDentifiers of the shared users. These numbers may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting them. But they have at most 52 significant bits, so 64-bit integers or double-precision float types are safe for storing these identifiers. The bot may not have access to the users and could be unable to use these identifiers, unless the users are already known to the bot by some other means.
-	UserIDs []int64 `json:"user_ids,omitempty"`
+	// Information about users shared with the bot.
+	Users []SharedUser `json:"users,omitempty"`
 }
 
 // Venue (https://core.telegram.org/bots/api#venue)
@@ -6765,7 +7100,7 @@ type Venue struct {
 //
 // This object represents a video file.
 type Video struct {
-	// IDentifier for this file, which can be used to download or reuse the file
+	// Identifier for this file, which can be used to download or reuse the file
 	FileID string `json:"file_id"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
 	FileUniqueID string `json:"file_unique_id"`
@@ -6818,7 +7153,7 @@ type VideoChatStarted struct{}
 //
 // This object represents a video message (available in Telegram apps as of v.4.0).
 type VideoNote struct {
-	// IDentifier for this file, which can be used to download or reuse the file
+	// Identifier for this file, which can be used to download or reuse the file
 	FileID string `json:"file_id"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
 	FileUniqueID string `json:"file_unique_id"`
@@ -6836,7 +7171,7 @@ type VideoNote struct {
 //
 // This object represents a voice note.
 type Voice struct {
-	// IDentifier for this file, which can be used to download or reuse the file
+	// Identifier for this file, which can be used to download or reuse the file
 	FileID string `json:"file_id"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
 	FileUniqueID string `json:"file_unique_id"`
