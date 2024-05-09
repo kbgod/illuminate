@@ -23,7 +23,7 @@ func (m Message) GetSender() *Sender {
 		User:               m.From,
 		Chat:               m.SenderChat,
 		IsAutomaticForward: m.IsAutomaticForward,
-		ChatID:             m.Chat.ID,
+		ChatID:             m.Chat.Id,
 		AuthorSignature:    m.AuthorSignature,
 	}
 }
@@ -33,10 +33,10 @@ func (m Message) GetSender() *Sender {
 // For this reason, we prefer to return the Chat.ID if it is available, rather than a dummy User.ID.
 func (s Sender) ID() int64 {
 	if s.Chat != nil {
-		return s.Chat.ID
+		return s.Chat.Id
 	}
 	if s.User != nil {
-		return s.User.ID
+		return s.User.Id
 	}
 	return 0
 }
@@ -112,21 +112,21 @@ func (s Sender) IsBot() bool {
 // IsAnonymousAdmin returns true if the Sender is an anonymous admin sending to a group.
 // For channel posts in a channel, see IsChannelPost.
 func (s Sender) IsAnonymousAdmin() bool {
-	return s.Chat != nil && s.Chat.ID == s.ChatID && s.Chat.Type != "channel"
+	return s.Chat != nil && s.Chat.Id == s.ChatID && s.Chat.Type != "channel"
 }
 
 // IsChannelPost returns true if the Sender is a channel admin posting to that same channel.
 func (s Sender) IsChannelPost() bool {
-	return s.Chat != nil && s.Chat.ID == s.ChatID && s.Chat.Type == "channel"
+	return s.Chat != nil && s.Chat.Id == s.ChatID && s.Chat.Type == "channel"
 }
 
 // IsAnonymousChannel returns true if the Sender is an anonymous channel sending to a group.
 // For channel admins posting in their own channel, see IsChannelPost.
 func (s Sender) IsAnonymousChannel() bool {
-	return s.Chat != nil && s.Chat.ID != s.ChatID && !s.IsAutomaticForward && s.Chat.Type == "channel"
+	return s.Chat != nil && s.Chat.Id != s.ChatID && !s.IsAutomaticForward && s.Chat.Type == "channel"
 }
 
 // IsLinkedChannel returns true if the Sender is a linked channel sending to the group it is linked to.
 func (s Sender) IsLinkedChannel() bool {
-	return s.Chat != nil && s.Chat.ID != s.ChatID && s.IsAutomaticForward
+	return s.Chat != nil && s.Chat.Id != s.ChatID && s.IsAutomaticForward
 }

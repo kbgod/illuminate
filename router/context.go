@@ -2,8 +2,9 @@ package router
 
 import (
 	"context"
-	"github.com/kbgod/illuminate"
 	"strings"
+
+	"github.com/kbgod/illuminate"
 )
 
 type Context struct {
@@ -75,13 +76,13 @@ func (ctx *Context) Message() *illuminate.Message {
 		case illuminate.InaccessibleMessage:
 			return &illuminate.Message{
 				Chat:      m.GetChat(),
-				MessageID: m.MessageID,
+				MessageId: m.MessageId,
 				Date:      m.Date,
 			}
 		case *illuminate.InaccessibleMessage:
 			return &illuminate.Message{
 				Chat:      m.GetChat(),
-				MessageID: m.MessageID,
+				MessageId: m.MessageId,
 				Date:      m.Date,
 			}
 		}
@@ -132,11 +133,11 @@ func (ctx *Context) Chat() *illuminate.Chat {
 
 func (ctx *Context) ChatID() int64 {
 	if c := ctx.Chat(); c != nil {
-		return c.ID
+		return c.Id
 	}
 
 	if s := ctx.Sender(); s != nil {
-		return s.ID
+		return s.Id
 	}
 
 	// impossible
@@ -216,7 +217,7 @@ func (ctx *Context) Answer(text string, opts ...*illuminate.AnswerCallbackQueryO
 	if len(opts) > 0 {
 		opt = opts[0]
 	}
-	return ctx.Bot.AnswerCallbackQuery(ctx.Update.CallbackQuery.ID, opt)
+	return ctx.Bot.AnswerCallbackQuery(ctx.Update.CallbackQuery.Id, opt)
 }
 
 // AnswerVoid sends answer to callback query without returning result
@@ -249,7 +250,7 @@ func (ctx *Context) DeleteMessage(opts ...*illuminate.DeleteMessageOpts) (bool, 
 	if len(opts) > 0 {
 		opt = opts[0]
 	}
-	return ctx.Bot.DeleteMessage(ctx.ChatID(), ctx.Message().MessageID, opt)
+	return ctx.Bot.DeleteMessage(ctx.ChatID(), ctx.Message().MessageId, opt)
 }
 
 // DeleteMessageVoid deletes message which is in update without returning result
@@ -271,12 +272,12 @@ func (ctx *Context) EditMessageText(text string, opts ...*illuminate.EditMessage
 	var opt *illuminate.EditMessageTextOpts
 	if len(opts) > 0 {
 		opt = opts[0]
-		opt.ChatID = ctx.ChatID()
-		opt.MessageID = ctx.Message().MessageID
+		opt.ChatId = ctx.ChatID()
+		opt.MessageId = ctx.Message().MessageId
 	} else {
 		opt = &illuminate.EditMessageTextOpts{
-			ChatID:    ctx.ChatID(),
-			MessageID: ctx.Message().MessageID,
+			ChatId:    ctx.ChatID(),
+			MessageId: ctx.Message().MessageId,
 		}
 	}
 
@@ -293,7 +294,7 @@ func (ctx *Context) ReplyEmojiReaction(emoji ...string) (bool, error) {
 	for _, e := range emoji {
 		reactions = append(reactions, illuminate.ReactionTypeEmoji{Emoji: e})
 	}
-	return ctx.Bot.SetMessageReaction(ctx.ChatID(), ctx.Message().MessageID, &illuminate.SetMessageReactionOpts{
+	return ctx.Bot.SetMessageReaction(ctx.ChatID(), ctx.Message().MessageId, &illuminate.SetMessageReactionOpts{
 		Reaction: reactions,
 	})
 }
@@ -308,7 +309,7 @@ func (ctx *Context) ReplyEmojiBigReaction(emoji ...string) (bool, error) {
 	for _, e := range emoji {
 		reactions = append(reactions, illuminate.ReactionTypeEmoji{Emoji: e})
 	}
-	return ctx.Bot.SetMessageReaction(ctx.ChatID(), ctx.Message().MessageID, &illuminate.SetMessageReactionOpts{
+	return ctx.Bot.SetMessageReaction(ctx.ChatID(), ctx.Message().MessageId, &illuminate.SetMessageReactionOpts{
 		Reaction: reactions,
 		IsBig:    true,
 	})

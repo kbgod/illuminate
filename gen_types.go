@@ -27,9 +27,9 @@ var (
 // This object represents an animation file (GIF or H.264/MPEG-4 AVC video without sound).
 type Animation struct {
 	// Identifier for this file, which can be used to download or reuse the file
-	FileID string `json:"file_id"`
+	FileId string `json:"file_id"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
-	FileUniqueID string `json:"file_unique_id"`
+	FileUniqueId string `json:"file_unique_id"`
 	// Video width as defined by sender
 	Width int64 `json:"width"`
 	// Video height as defined by sender
@@ -51,9 +51,9 @@ type Animation struct {
 // This object represents an audio file to be treated as music by the Telegram clients.
 type Audio struct {
 	// Identifier for this file, which can be used to download or reuse the file
-	FileID string `json:"file_id"`
+	FileId string `json:"file_id"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
-	FileUniqueID string `json:"file_unique_id"`
+	FileUniqueId string `json:"file_unique_id"`
 	// Duration of the audio in seconds as defined by sender
 	Duration int64 `json:"duration"`
 	// Optional. Performer of the audio as defined by sender or by audio tags
@@ -124,9 +124,9 @@ type MergedBotCommandScope struct {
 	// Scope type
 	Type string `json:"type"`
 	// Optional. Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername) (Only for chat, chat_administrators, chat_member)
-	ChatID int64 `json:"chat_id,omitempty"`
+	ChatId int64 `json:"chat_id,omitempty"`
 	// Optional. Unique identifier of the target user (Only for chat_member)
-	UserID int64 `json:"user_id,omitempty"`
+	UserId int64 `json:"user_id,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -246,7 +246,7 @@ func (v BotCommandScopeAllPrivateChats) botCommandScope() {}
 // Represents the scope of bot commands, covering a specific chat.
 type BotCommandScopeChat struct {
 	// Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
-	ChatID int64 `json:"chat_id"`
+	ChatId int64 `json:"chat_id"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -258,7 +258,7 @@ func (v BotCommandScopeChat) GetType() string {
 func (v BotCommandScopeChat) MergeBotCommandScope() MergedBotCommandScope {
 	return MergedBotCommandScope{
 		Type:   "chat",
-		ChatID: v.ChatID,
+		ChatId: v.ChatId,
 	}
 }
 
@@ -283,7 +283,7 @@ func (v BotCommandScopeChat) botCommandScope() {}
 // Represents the scope of bot commands, covering all administrators of a specific group or supergroup chat.
 type BotCommandScopeChatAdministrators struct {
 	// Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
-	ChatID int64 `json:"chat_id"`
+	ChatId int64 `json:"chat_id"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -295,7 +295,7 @@ func (v BotCommandScopeChatAdministrators) GetType() string {
 func (v BotCommandScopeChatAdministrators) MergeBotCommandScope() MergedBotCommandScope {
 	return MergedBotCommandScope{
 		Type:   "chat_administrators",
-		ChatID: v.ChatID,
+		ChatId: v.ChatId,
 	}
 }
 
@@ -320,9 +320,9 @@ func (v BotCommandScopeChatAdministrators) botCommandScope() {}
 // Represents the scope of bot commands, covering a specific member of a group or supergroup chat.
 type BotCommandScopeChatMember struct {
 	// Unique identifier for the target chat or username of the target supergroup (in the format @supergroupusername)
-	ChatID int64 `json:"chat_id"`
+	ChatId int64 `json:"chat_id"`
 	// Unique identifier of the target user
-	UserID int64 `json:"user_id"`
+	UserId int64 `json:"user_id"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -334,8 +334,8 @@ func (v BotCommandScopeChatMember) GetType() string {
 func (v BotCommandScopeChatMember) MergeBotCommandScope() MergedBotCommandScope {
 	return MergedBotCommandScope{
 		Type:   "chat_member",
-		ChatID: v.ChatID,
-		UserID: v.UserID,
+		ChatId: v.ChatId,
+		UserId: v.UserId,
 	}
 }
 
@@ -417,11 +417,11 @@ type BotShortDescription struct {
 // Describes the connection of the bot with a business account.
 type BusinessConnection struct {
 	// Unique identifier of the business connection
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// Business account user that created the business connection
 	User User `json:"user"`
 	// Identifier of a private chat with the user who created the business connection. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a 64-bit integer or double-precision float type are safe for storing this identifier.
-	UserChatID int64 `json:"user_chat_id"`
+	UserChatId int64 `json:"user_chat_id"`
 	// Date the connection was established in Unix time
 	Date int64 `json:"date"`
 	// True, if the bot can act on behalf of the business account in chats that were active in the last 24 hours
@@ -453,11 +453,11 @@ type BusinessLocation struct {
 // This object is received when messages are deleted from a connected business account.
 type BusinessMessagesDeleted struct {
 	// Unique identifier of the business connection
-	BusinessConnectionID string `json:"business_connection_id"`
+	BusinessConnectionId string `json:"business_connection_id"`
 	// Information about a chat in the business account. The bot may not have access to the chat or the corresponding user.
 	Chat Chat `json:"chat"`
-	// A JSON-serialized list of identifiers of deleted messages in the chat of the business account
-	MessageIDs []int64 `json:"message_ids,omitempty"`
+	// The list of identifiers of deleted messages in the chat of the business account
+	MessageIds []int64 `json:"message_ids,omitempty"`
 }
 
 // BusinessOpeningHours (https://core.telegram.org/bots/api#businessopeninghours)
@@ -486,13 +486,13 @@ type CallbackGame struct{}
 // This object represents an incoming callback query from a callback button in an inline keyboard. If the button that originated the query was attached to a message sent by the bot, the field message will be present. If the button was attached to a message sent via the bot (in inline mode), the field inline_message_id will be present. Exactly one of the fields data or game_short_name will be present.
 type CallbackQuery struct {
 	// Unique identifier for this query
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// Sender
 	From User `json:"from"`
 	// Optional. Message sent by the bot with the callback button that originated the query
 	Message MaybeInaccessibleMessage `json:"message,omitempty"`
 	// Optional. Identifier of the message sent via the bot in inline mode, that originated the query.
-	InlineMessageID string `json:"inline_message_id,omitempty"`
+	InlineMessageId string `json:"inline_message_id,omitempty"`
 	// Global identifier, uniquely corresponding to the chat to which the message with the callback button was sent. Useful for high scores in games.
 	ChatInstance string `json:"chat_instance"`
 	// Optional. Data associated with the callback button. Be aware that the message originated the query can contain no callback buttons with this data.
@@ -505,10 +505,10 @@ type CallbackQuery struct {
 func (v *CallbackQuery) UnmarshalJSON(b []byte) error {
 	// All fields in CallbackQuery, with interface fields as json.RawMessage
 	type tmp struct {
-		ID              string          `json:"id"`
+		Id              string          `json:"id"`
 		From            User            `json:"from"`
 		Message         json.RawMessage `json:"message"`
-		InlineMessageID string          `json:"inline_message_id"`
+		InlineMessageId string          `json:"inline_message_id"`
 		ChatInstance    string          `json:"chat_instance"`
 		Data            string          `json:"data"`
 		GameShortName   string          `json:"game_short_name"`
@@ -519,13 +519,13 @@ func (v *CallbackQuery) UnmarshalJSON(b []byte) error {
 		return fmt.Errorf("failed to unmarshal CallbackQuery JSON into tmp struct: %w", err)
 	}
 
-	v.ID = t.ID
+	v.Id = t.Id
 	v.From = t.From
 	v.Message, err = unmarshalMaybeInaccessibleMessage(t.Message)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal custom JSON field Message: %w", err)
 	}
-	v.InlineMessageID = t.InlineMessageID
+	v.InlineMessageId = t.InlineMessageId
 	v.ChatInstance = t.ChatInstance
 	v.Data = t.Data
 	v.GameShortName = t.GameShortName
@@ -538,7 +538,7 @@ func (v *CallbackQuery) UnmarshalJSON(b []byte) error {
 // This object represents a chat.
 type Chat struct {
 	// Unique identifier for this chat. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this identifier.
-	ID int64 `json:"id"`
+	Id int64 `json:"id"`
 	// Type of chat, can be either "private", "group", "supergroup" or "channel"
 	Type string `json:"type"`
 	// Optional. Title, for supergroups, channels and group chats
@@ -568,15 +568,15 @@ type Chat struct {
 	// Optional. List of available reactions allowed in the chat. If omitted, then all emoji reactions are allowed. Returned only in getChat.
 	AvailableReactions []ReactionType `json:"available_reactions,omitempty"`
 	// Optional. Identifier of the accent color for the chat name and backgrounds of the chat photo, reply header, and link preview. See accent colors for more details. Returned only in getChat. Always returned in getChat.
-	AccentColorID int64 `json:"accent_color_id,omitempty"`
+	AccentColorId int64 `json:"accent_color_id,omitempty"`
 	// Optional. Custom emoji identifier of emoji chosen by the chat for the reply header and link preview background. Returned only in getChat.
-	BackgroundCustomEmojiID string `json:"background_custom_emoji_id,omitempty"`
+	BackgroundCustomEmojiId string `json:"background_custom_emoji_id,omitempty"`
 	// Optional. Identifier of the accent color for the chat's profile background. See profile accent colors for more details. Returned only in getChat.
-	ProfileAccentColorID int64 `json:"profile_accent_color_id,omitempty"`
+	ProfileAccentColorId int64 `json:"profile_accent_color_id,omitempty"`
 	// Optional. Custom emoji identifier of the emoji chosen by the chat for its profile background. Returned only in getChat.
-	ProfileBackgroundCustomEmojiID string `json:"profile_background_custom_emoji_id,omitempty"`
+	ProfileBackgroundCustomEmojiId string `json:"profile_background_custom_emoji_id,omitempty"`
 	// Optional. Custom emoji identifier of the emoji status of the chat or the other party in a private chat. Returned only in getChat.
-	EmojiStatusCustomEmojiID string `json:"emoji_status_custom_emoji_id,omitempty"`
+	EmojiStatusCustomEmojiId string `json:"emoji_status_custom_emoji_id,omitempty"`
 	// Optional. Expiration date of the emoji status of the chat or the other party in a private chat, in Unix time, if any. Returned only in getChat.
 	EmojiStatusExpirationDate int64 `json:"emoji_status_expiration_date,omitempty"`
 	// Optional. Bio of the other party in a private chat. Returned only in getChat.
@@ -618,7 +618,7 @@ type Chat struct {
 	// Optional. For supergroups, the name of the group's custom emoji sticker set. Custom emoji from this set can be used by all users and bots in the group. Returned only in getChat.
 	CustomEmojiStickerSetName string `json:"custom_emoji_sticker_set_name,omitempty"`
 	// Optional. Unique identifier for the linked chat, i.e. the discussion group identifier for a channel and vice versa; for supergroups and channel chats. This identifier may be greater than 32 bits and some programming languages may have difficulty/silent defects in interpreting it. But it is smaller than 52 bits, so a signed 64 bit integer or double-precision float type are safe for storing this identifier. Returned only in getChat.
-	LinkedChatID int64 `json:"linked_chat_id,omitempty"`
+	LinkedChatId int64 `json:"linked_chat_id,omitempty"`
 	// Optional. For supergroups, the location to which the supergroup is connected. Returned only in getChat.
 	Location *ChatLocation `json:"location,omitempty"`
 }
@@ -627,7 +627,7 @@ type Chat struct {
 func (v *Chat) UnmarshalJSON(b []byte) error {
 	// All fields in Chat, with interface fields as json.RawMessage
 	type tmp struct {
-		ID                                 int64                 `json:"id"`
+		Id                                 int64                 `json:"id"`
 		Type                               string                `json:"type"`
 		Title                              string                `json:"title"`
 		Username                           string                `json:"username"`
@@ -642,11 +642,11 @@ func (v *Chat) UnmarshalJSON(b []byte) error {
 		BusinessOpeningHours               *BusinessOpeningHours `json:"business_opening_hours"`
 		PersonalChat                       *Chat                 `json:"personal_chat"`
 		AvailableReactions                 json.RawMessage       `json:"available_reactions"`
-		AccentColorID                      int64                 `json:"accent_color_id"`
-		BackgroundCustomEmojiID            string                `json:"background_custom_emoji_id"`
-		ProfileAccentColorID               int64                 `json:"profile_accent_color_id"`
-		ProfileBackgroundCustomEmojiID     string                `json:"profile_background_custom_emoji_id"`
-		EmojiStatusCustomEmojiID           string                `json:"emoji_status_custom_emoji_id"`
+		AccentColorId                      int64                 `json:"accent_color_id"`
+		BackgroundCustomEmojiId            string                `json:"background_custom_emoji_id"`
+		ProfileAccentColorId               int64                 `json:"profile_accent_color_id"`
+		ProfileBackgroundCustomEmojiId     string                `json:"profile_background_custom_emoji_id"`
+		EmojiStatusCustomEmojiId           string                `json:"emoji_status_custom_emoji_id"`
 		EmojiStatusExpirationDate          int64                 `json:"emoji_status_expiration_date"`
 		Bio                                string                `json:"bio"`
 		HasPrivateForwards                 bool                  `json:"has_private_forwards"`
@@ -667,7 +667,7 @@ func (v *Chat) UnmarshalJSON(b []byte) error {
 		StickerSetName                     string                `json:"sticker_set_name"`
 		CanSetStickerSet                   bool                  `json:"can_set_sticker_set"`
 		CustomEmojiStickerSetName          string                `json:"custom_emoji_sticker_set_name"`
-		LinkedChatID                       int64                 `json:"linked_chat_id"`
+		LinkedChatId                       int64                 `json:"linked_chat_id"`
 		Location                           *ChatLocation         `json:"location"`
 	}
 	t := tmp{}
@@ -676,7 +676,7 @@ func (v *Chat) UnmarshalJSON(b []byte) error {
 		return fmt.Errorf("failed to unmarshal Chat JSON into tmp struct: %w", err)
 	}
 
-	v.ID = t.ID
+	v.Id = t.Id
 	v.Type = t.Type
 	v.Title = t.Title
 	v.Username = t.Username
@@ -694,11 +694,11 @@ func (v *Chat) UnmarshalJSON(b []byte) error {
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal custom JSON field AvailableReactions: %w", err)
 	}
-	v.AccentColorID = t.AccentColorID
-	v.BackgroundCustomEmojiID = t.BackgroundCustomEmojiID
-	v.ProfileAccentColorID = t.ProfileAccentColorID
-	v.ProfileBackgroundCustomEmojiID = t.ProfileBackgroundCustomEmojiID
-	v.EmojiStatusCustomEmojiID = t.EmojiStatusCustomEmojiID
+	v.AccentColorId = t.AccentColorId
+	v.BackgroundCustomEmojiId = t.BackgroundCustomEmojiId
+	v.ProfileAccentColorId = t.ProfileAccentColorId
+	v.ProfileBackgroundCustomEmojiId = t.ProfileBackgroundCustomEmojiId
+	v.EmojiStatusCustomEmojiId = t.EmojiStatusCustomEmojiId
 	v.EmojiStatusExpirationDate = t.EmojiStatusExpirationDate
 	v.Bio = t.Bio
 	v.HasPrivateForwards = t.HasPrivateForwards
@@ -719,7 +719,7 @@ func (v *Chat) UnmarshalJSON(b []byte) error {
 	v.StickerSetName = t.StickerSetName
 	v.CanSetStickerSet = t.CanSetStickerSet
 	v.CustomEmojiStickerSetName = t.CustomEmojiStickerSetName
-	v.LinkedChatID = t.LinkedChatID
+	v.LinkedChatId = t.LinkedChatId
 	v.Location = t.Location
 
 	return nil
@@ -766,7 +766,7 @@ type ChatAdministratorRights struct {
 // This object contains information about a chat boost.
 type ChatBoost struct {
 	// Unique identifier of the boost
-	BoostID string `json:"boost_id"`
+	BoostId string `json:"boost_id"`
 	// Point in time (Unix timestamp) when the chat was boosted
 	AddDate int64 `json:"add_date"`
 	// Point in time (Unix timestamp) when the boost will automatically expire, unless the booster's Telegram Premium subscription is prolonged
@@ -779,7 +779,7 @@ type ChatBoost struct {
 func (v *ChatBoost) UnmarshalJSON(b []byte) error {
 	// All fields in ChatBoost, with interface fields as json.RawMessage
 	type tmp struct {
-		BoostID        string          `json:"boost_id"`
+		BoostId        string          `json:"boost_id"`
 		AddDate        int64           `json:"add_date"`
 		ExpirationDate int64           `json:"expiration_date"`
 		Source         json.RawMessage `json:"source"`
@@ -790,7 +790,7 @@ func (v *ChatBoost) UnmarshalJSON(b []byte) error {
 		return fmt.Errorf("failed to unmarshal ChatBoost JSON into tmp struct: %w", err)
 	}
 
-	v.BoostID = t.BoostID
+	v.BoostId = t.BoostId
 	v.AddDate = t.AddDate
 	v.ExpirationDate = t.ExpirationDate
 	v.Source, err = unmarshalChatBoostSource(t.Source)
@@ -816,7 +816,7 @@ type ChatBoostRemoved struct {
 	// Chat which was boosted
 	Chat Chat `json:"chat"`
 	// Unique identifier of the boost
-	BoostID string `json:"boost_id"`
+	BoostId string `json:"boost_id"`
 	// Point in time (Unix timestamp) when the boost was removed
 	RemoveDate int64 `json:"remove_date"`
 	// Source of the removed boost
@@ -828,7 +828,7 @@ func (v *ChatBoostRemoved) UnmarshalJSON(b []byte) error {
 	// All fields in ChatBoostRemoved, with interface fields as json.RawMessage
 	type tmp struct {
 		Chat       Chat            `json:"chat"`
-		BoostID    string          `json:"boost_id"`
+		BoostId    string          `json:"boost_id"`
 		RemoveDate int64           `json:"remove_date"`
 		Source     json.RawMessage `json:"source"`
 	}
@@ -839,7 +839,7 @@ func (v *ChatBoostRemoved) UnmarshalJSON(b []byte) error {
 	}
 
 	v.Chat = t.Chat
-	v.BoostID = t.BoostID
+	v.BoostId = t.BoostId
 	v.RemoveDate = t.RemoveDate
 	v.Source, err = unmarshalChatBoostSource(t.Source)
 	if err != nil {
@@ -877,7 +877,7 @@ type MergedChatBoostSource struct {
 	// Optional. User that provided the boost (may be empty for ChatBoostSourceGiveaway)
 	User *User `json:"user,omitempty"`
 	// Optional. Identifier of a message in the chat with the giveaway; the message could have been deleted already. May be 0 if the message isn't sent yet. (Only for giveaway)
-	GiveawayMessageID int64 `json:"giveaway_message_id,omitempty"`
+	GiveawayMessageId int64 `json:"giveaway_message_id,omitempty"`
 	// Optional. True, if the giveaway was completed, but there was no user to win the prize (Only for giveaway)
 	IsUnclaimed bool `json:"is_unclaimed,omitempty"`
 }
@@ -1006,7 +1006,7 @@ func (v ChatBoostSourceGiftCode) chatBoostSource() {}
 // The boost was obtained by the creation of a Telegram Premium giveaway. This boosts the chat 4 times for the duration of the corresponding Telegram Premium subscription.
 type ChatBoostSourceGiveaway struct {
 	// Identifier of a message in the chat with the giveaway; the message could have been deleted already. May be 0 if the message isn't sent yet.
-	GiveawayMessageID int64 `json:"giveaway_message_id"`
+	GiveawayMessageId int64 `json:"giveaway_message_id"`
 	// Optional. User that won the prize in the giveaway if any
 	User *User `json:"user,omitempty"`
 	// Optional. True, if the giveaway was completed, but there was no user to win the prize
@@ -1022,7 +1022,7 @@ func (v ChatBoostSourceGiveaway) GetSource() string {
 func (v ChatBoostSourceGiveaway) MergeChatBoostSource() MergedChatBoostSource {
 	return MergedChatBoostSource{
 		Source:            "giveaway",
-		GiveawayMessageID: v.GiveawayMessageID,
+		GiveawayMessageId: v.GiveawayMessageId,
 		User:              v.User,
 		IsUnclaimed:       v.IsUnclaimed,
 	}
@@ -1124,7 +1124,7 @@ type ChatJoinRequest struct {
 	// User that sent the join request
 	From User `json:"from"`
 	// Identifier of a private chat with the user who sent the join request. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a 64-bit integer or double-precision float type are safe for storing this identifier. The bot can use this identifier for 5 minutes to send messages until the join request is processed, assuming no other administrator contacted the user.
-	UserChatID int64 `json:"user_chat_id"`
+	UserChatId int64 `json:"user_chat_id"`
 	// Date the request was sent in Unix time
 	Date int64 `json:"date"`
 	// Optional. Bio of the user.
@@ -1802,13 +1802,13 @@ type ChatPermissions struct {
 // This object represents a chat photo.
 type ChatPhoto struct {
 	// File identifier of small (160x160) chat photo. This file_id can be used only for photo download and only for as long as the photo is not changed.
-	SmallFileID string `json:"small_file_id"`
+	SmallFileId string `json:"small_file_id"`
 	// Unique file identifier of small (160x160) chat photo, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
-	SmallFileUniqueID string `json:"small_file_unique_id"`
+	SmallFileUniqueId string `json:"small_file_unique_id"`
 	// File identifier of big (640x640) chat photo. This file_id can be used only for photo download and only for as long as the photo is not changed.
-	BigFileID string `json:"big_file_id"`
+	BigFileId string `json:"big_file_id"`
 	// Unique file identifier of big (640x640) chat photo, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
-	BigFileUniqueID string `json:"big_file_unique_id"`
+	BigFileUniqueId string `json:"big_file_unique_id"`
 }
 
 // ChatShared (https://core.telegram.org/bots/api#chatshared)
@@ -1816,9 +1816,9 @@ type ChatPhoto struct {
 // This object contains information about a chat that was shared with the bot using a KeyboardButtonRequestChat button.
 type ChatShared struct {
 	// Identifier of the request
-	RequestID int64 `json:"request_id"`
+	RequestId int64 `json:"request_id"`
 	// Identifier of the shared chat. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a 64-bit integer or double-precision float type are safe for storing this identifier. The bot may not have access to the chat and could be unable to use this identifier, unless the chat is already known to the bot by some other means.
-	ChatID int64 `json:"chat_id"`
+	ChatId int64 `json:"chat_id"`
 	// Optional. Title of the chat, if the title was requested by the bot.
 	Title string `json:"title,omitempty"`
 	// Optional. Username of the chat, if the username was requested by the bot and available.
@@ -1833,13 +1833,13 @@ type ChatShared struct {
 // Note: It is necessary to enable inline feedback via @BotFather in order to receive these objects in updates.
 type ChosenInlineResult struct {
 	// The unique identifier for the result that was chosen
-	ResultID string `json:"result_id"`
+	ResultId string `json:"result_id"`
 	// The user that chose the result
 	From User `json:"from"`
 	// Optional. Sender location, only for bots that require user location
 	Location *Location `json:"location,omitempty"`
 	// Optional. Identifier of the sent inline message. Available only if there is an inline keyboard attached to the message. Will be also received in callback queries and can be used to edit the message.
-	InlineMessageID string `json:"inline_message_id,omitempty"`
+	InlineMessageId string `json:"inline_message_id,omitempty"`
 	// The query that was used to obtain the result
 	Query string `json:"query"`
 }
@@ -1855,7 +1855,7 @@ type Contact struct {
 	// Optional. Contact's last name
 	LastName string `json:"last_name,omitempty"`
 	// Optional. Contact's user identifier in Telegram. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a 64-bit integer or double-precision float type are safe for storing this identifier.
-	UserID int64 `json:"user_id,omitempty"`
+	UserId int64 `json:"user_id,omitempty"`
 	// Optional. Additional data about the contact in the form of a vCard
 	Vcard string `json:"vcard,omitempty"`
 }
@@ -1875,9 +1875,9 @@ type Dice struct {
 // This object represents a general file (as opposed to photos, voice messages and audio files).
 type Document struct {
 	// Identifier for this file, which can be used to download or reuse the file
-	FileID string `json:"file_id"`
+	FileId string `json:"file_id"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
-	FileUniqueID string `json:"file_unique_id"`
+	FileUniqueId string `json:"file_unique_id"`
 	// Optional. Document thumbnail as defined by sender
 	Thumbnail *PhotoSize `json:"thumbnail,omitempty"`
 	// Optional. Original filename as defined by sender
@@ -1935,7 +1935,7 @@ type ExternalReplyInfo struct {
 	// Optional. Chat the original message belongs to. Available only if the chat is a supergroup or a channel.
 	Chat *Chat `json:"chat,omitempty"`
 	// Optional. Unique message identifier inside the original chat. Available only if the original chat is a supergroup or a channel.
-	MessageID int64 `json:"message_id,omitempty"`
+	MessageId int64 `json:"message_id,omitempty"`
 	// Optional. Options used for link preview generation for the original message, if it is a text message
 	LinkPreviewOptions *LinkPreviewOptions `json:"link_preview_options,omitempty"`
 	// Optional. Message is an animation, information about the animation
@@ -1984,7 +1984,7 @@ func (v *ExternalReplyInfo) UnmarshalJSON(b []byte) error {
 	type tmp struct {
 		Origin             json.RawMessage     `json:"origin"`
 		Chat               *Chat               `json:"chat"`
-		MessageID          int64               `json:"message_id"`
+		MessageId          int64               `json:"message_id"`
 		LinkPreviewOptions *LinkPreviewOptions `json:"link_preview_options"`
 		Animation          *Animation          `json:"animation"`
 		Audio              *Audio              `json:"audio"`
@@ -2017,7 +2017,7 @@ func (v *ExternalReplyInfo) UnmarshalJSON(b []byte) error {
 		return fmt.Errorf("failed to unmarshal custom JSON field Origin: %w", err)
 	}
 	v.Chat = t.Chat
-	v.MessageID = t.MessageID
+	v.MessageId = t.MessageId
 	v.LinkPreviewOptions = t.LinkPreviewOptions
 	v.Animation = t.Animation
 	v.Audio = t.Audio
@@ -2047,9 +2047,9 @@ func (v *ExternalReplyInfo) UnmarshalJSON(b []byte) error {
 // This object represents a file ready to be downloaded. The file can be downloaded via the link https://api.telegram.org/file/bot<token>/<file_path>. It is guaranteed that the link will be valid for at least 1 hour. When the link expires, a new one can be requested by calling getFile.
 type File struct {
 	// Identifier for this file, which can be used to download or reuse the file
-	FileID string `json:"file_id"`
+	FileId string `json:"file_id"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
-	FileUniqueID string `json:"file_unique_id"`
+	FileUniqueId string `json:"file_unique_id"`
 	// Optional. File size in bytes. It can be bigger than 2^31 and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this value.
 	FileSize int64 `json:"file_size,omitempty"`
 	// Optional. File path. Use https://api.telegram.org/file/bot<token>/<file_path> to get the file.
@@ -2076,13 +2076,13 @@ func (v ForceReply) replyMarkup() {}
 // This object represents a forum topic.
 type ForumTopic struct {
 	// Unique identifier of the forum topic
-	MessageThreadID int64 `json:"message_thread_id"`
+	MessageThreadId int64 `json:"message_thread_id"`
 	// Name of the topic
 	Name string `json:"name"`
 	// Color of the topic icon in RGB format
 	IconColor int64 `json:"icon_color"`
 	// Optional. Unique identifier of the custom emoji shown as the topic icon
-	IconCustomEmojiID string `json:"icon_custom_emoji_id,omitempty"`
+	IconCustomEmojiId string `json:"icon_custom_emoji_id,omitempty"`
 }
 
 // ForumTopicClosed (https://core.telegram.org/bots/api#forumtopicclosed)
@@ -2099,7 +2099,7 @@ type ForumTopicCreated struct {
 	// Color of the topic icon in RGB format
 	IconColor int64 `json:"icon_color"`
 	// Optional. Unique identifier of the custom emoji shown as the topic icon
-	IconCustomEmojiID string `json:"icon_custom_emoji_id,omitempty"`
+	IconCustomEmojiId string `json:"icon_custom_emoji_id,omitempty"`
 }
 
 // ForumTopicEdited (https://core.telegram.org/bots/api#forumtopicedited)
@@ -2109,7 +2109,7 @@ type ForumTopicEdited struct {
 	// Optional. New name of the topic, if it was edited
 	Name string `json:"name,omitempty"`
 	// Optional. New identifier of the custom emoji shown as the topic icon, if it was edited; an empty string if the icon was removed
-	IconCustomEmojiID string `json:"icon_custom_emoji_id,omitempty"`
+	IconCustomEmojiId string `json:"icon_custom_emoji_id,omitempty"`
 }
 
 // ForumTopicReopened (https://core.telegram.org/bots/api#forumtopicreopened)
@@ -2203,7 +2203,7 @@ type GiveawayWinners struct {
 	// The chat that created the giveaway
 	Chat Chat `json:"chat"`
 	// Identifier of the message with the giveaway in the chat
-	GiveawayMessageID int64 `json:"giveaway_message_id"`
+	GiveawayMessageId int64 `json:"giveaway_message_id"`
 	// Point in time (Unix timestamp) when winners of the giveaway were selected
 	WinnersSelectionDate int64 `json:"winners_selection_date"`
 	// Total number of winners in the giveaway
@@ -2231,14 +2231,14 @@ type InaccessibleMessage struct {
 	// Chat the message belonged to
 	Chat Chat `json:"chat"`
 	// Unique message identifier inside the chat
-	MessageID int64 `json:"message_id"`
+	MessageId int64 `json:"message_id"`
 	// Always 0. The field can be used to differentiate regular and inaccessible messages.
 	Date int64 `json:"date"`
 }
 
-// GetMessageID is a helper method to easily access the common fields of an interface.
-func (v InaccessibleMessage) GetMessageID() int64 {
-	return v.MessageID
+// GetMessageId is a helper method to easily access the common fields of an interface.
+func (v InaccessibleMessage) GetMessageId() int64 {
+	return v.MessageId
 }
 
 // GetDate is a helper method to easily access the common fields of an interface.
@@ -2296,7 +2296,7 @@ func (v InlineKeyboardMarkup) replyMarkup() {}
 // This object represents an incoming inline query. When the user sends an empty query, your bot could return some default or trending results.
 type InlineQuery struct {
 	// Unique identifier for this query
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// Sender
 	From User `json:"from"`
 	// Text of the query (up to 256 characters)
@@ -2336,7 +2336,7 @@ type InlineQuery struct {
 // Note: All URLs passed in inline query results will be available to end users and therefore must be assumed to be public.
 type InlineQueryResult interface {
 	GetType() string
-	GetID() string
+	GetId() string
 	// MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with complex telegram types in a non-generic world.
 	MergeInlineQueryResult() MergedInlineQueryResult
 	// inlineQueryResult exists to avoid external types implementing this interface.
@@ -2372,9 +2372,9 @@ type MergedInlineQueryResult struct {
 	// Type of the result
 	Type string `json:"type"`
 	// Unique identifier for this result, 1-64 bytes
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// Optional. A valid file identifier for the audio file (Only for audio)
-	AudioFileID string `json:"audio_file_id,omitempty"`
+	AudioFileId string `json:"audio_file_id,omitempty"`
 	// Optional. Caption, 0-1024 characters after entities parsing (Only for audio, document, gif, mpeg4_gif, photo, video, voice, audio, document, gif, mpeg4_gif, photo, video, voice)
 	Caption string `json:"caption,omitempty"`
 	// Optional. Mode for parsing entities in the audio caption. See formatting options for more details. (Only for audio, document, gif, mpeg4_gif, photo, video, voice, audio, document, gif, mpeg4_gif, photo, video, voice)
@@ -2388,21 +2388,21 @@ type MergedInlineQueryResult struct {
 	// Optional. Title for the result (Only for document, gif, mpeg4_gif, photo, video, voice, article, audio, document, gif, location, mpeg4_gif, photo, venue, video, voice)
 	Title string `json:"title,omitempty"`
 	// Optional. A valid file identifier for the file (Only for document)
-	DocumentFileID string `json:"document_file_id,omitempty"`
+	DocumentFileId string `json:"document_file_id,omitempty"`
 	// Optional. Short description of the result (Only for document, photo, video, article, document, photo, video)
 	Description string `json:"description,omitempty"`
 	// Optional. A valid file identifier for the GIF file (Only for gif)
-	GifFileID string `json:"gif_file_id,omitempty"`
+	GifFileId string `json:"gif_file_id,omitempty"`
 	// Optional. A valid file identifier for the MPEG4 file (Only for mpeg4_gif)
-	Mpeg4FileID string `json:"mpeg4_file_id,omitempty"`
+	Mpeg4FileId string `json:"mpeg4_file_id,omitempty"`
 	// Optional. A valid file identifier of the photo (Only for photo)
-	PhotoFileID string `json:"photo_file_id,omitempty"`
+	PhotoFileId string `json:"photo_file_id,omitempty"`
 	// Optional. A valid file identifier of the sticker (Only for sticker)
-	StickerFileID string `json:"sticker_file_id,omitempty"`
+	StickerFileId string `json:"sticker_file_id,omitempty"`
 	// Optional. A valid file identifier for the video file (Only for video)
-	VideoFileID string `json:"video_file_id,omitempty"`
+	VideoFileId string `json:"video_file_id,omitempty"`
 	// Optional. A valid file identifier for the voice message (Only for voice)
-	VoiceFileID string `json:"voice_file_id,omitempty"`
+	VoiceFileId string `json:"voice_file_id,omitempty"`
 	// Optional. URL of the result (Only for article)
 	Url string `json:"url,omitempty"`
 	// Optional. Pass True if you don't want the URL to be shown in the message (Only for article)
@@ -2472,11 +2472,11 @@ type MergedInlineQueryResult struct {
 	// Optional. Address of the venue (Only for venue)
 	Address string `json:"address,omitempty"`
 	// Optional. Foursquare identifier of the venue if known (Only for venue)
-	FoursquareID string `json:"foursquare_id,omitempty"`
+	FoursquareId string `json:"foursquare_id,omitempty"`
 	// Optional. Foursquare type of the venue, if known. (For example, "arts_entertainment/default", "arts_entertainment/aquarium" or "food/icecream".) (Only for venue)
 	FoursquareType string `json:"foursquare_type,omitempty"`
 	// Optional. Google Places identifier of the venue (Only for venue)
-	GooglePlaceID string `json:"google_place_id,omitempty"`
+	GooglePlaceId string `json:"google_place_id,omitempty"`
 	// Optional. Google Places type of the venue. (See supported types.) (Only for venue)
 	GooglePlaceType string `json:"google_place_type,omitempty"`
 	// Optional. A valid URL for the embedded video player or video file (Only for video)
@@ -2498,9 +2498,9 @@ func (v MergedInlineQueryResult) GetType() string {
 	return v.Type
 }
 
-// GetID is a helper method to easily access the common fields of an interface.
-func (v MergedInlineQueryResult) GetID() string {
-	return v.ID
+// GetId is a helper method to easily access the common fields of an interface.
+func (v MergedInlineQueryResult) GetId() string {
+	return v.Id
 }
 
 // MergedInlineQueryResult.inlineQueryResult is a dummy method to avoid interface implementation.
@@ -2516,7 +2516,7 @@ func (v MergedInlineQueryResult) MergeInlineQueryResult() MergedInlineQueryResul
 // Represents a link to an article or web page.
 type InlineQueryResultArticle struct {
 	// Unique identifier for this result, 1-64 Bytes
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// Title of the result
 	Title string `json:"title"`
 	// Content of the message to be sent
@@ -2542,16 +2542,16 @@ func (v InlineQueryResultArticle) GetType() string {
 	return "article"
 }
 
-// GetID is a helper method to easily access the common fields of an interface.
-func (v InlineQueryResultArticle) GetID() string {
-	return v.ID
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultArticle) GetId() string {
+	return v.Id
 }
 
 // MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultArticle) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "article",
-		ID:                  v.ID,
+		Id:                  v.Id,
 		Title:               v.Title,
 		InputMessageContent: v.InputMessageContent,
 		ReplyMarkup:         v.ReplyMarkup,
@@ -2585,7 +2585,7 @@ func (v InlineQueryResultArticle) inlineQueryResult() {}
 // Represents a link to an MP3 audio file. By default, this audio file will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the audio.
 type InlineQueryResultAudio struct {
 	// Unique identifier for this result, 1-64 bytes
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// A valid URL for the audio file
 	AudioUrl string `json:"audio_url"`
 	// Title
@@ -2611,16 +2611,16 @@ func (v InlineQueryResultAudio) GetType() string {
 	return "audio"
 }
 
-// GetID is a helper method to easily access the common fields of an interface.
-func (v InlineQueryResultAudio) GetID() string {
-	return v.ID
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultAudio) GetId() string {
+	return v.Id
 }
 
 // MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultAudio) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "audio",
-		ID:                  v.ID,
+		Id:                  v.Id,
 		AudioUrl:            v.AudioUrl,
 		Title:               v.Title,
 		Caption:             v.Caption,
@@ -2654,9 +2654,9 @@ func (v InlineQueryResultAudio) inlineQueryResult() {}
 // Represents a link to an MP3 audio file stored on the Telegram servers. By default, this audio file will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the audio.
 type InlineQueryResultCachedAudio struct {
 	// Unique identifier for this result, 1-64 bytes
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// A valid file identifier for the audio file
-	AudioFileID string `json:"audio_file_id"`
+	AudioFileId string `json:"audio_file_id"`
 	// Optional. Caption, 0-1024 characters after entities parsing
 	Caption string `json:"caption,omitempty"`
 	// Optional. Mode for parsing entities in the audio caption. See formatting options for more details.
@@ -2674,17 +2674,17 @@ func (v InlineQueryResultCachedAudio) GetType() string {
 	return "audio"
 }
 
-// GetID is a helper method to easily access the common fields of an interface.
-func (v InlineQueryResultCachedAudio) GetID() string {
-	return v.ID
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultCachedAudio) GetId() string {
+	return v.Id
 }
 
 // MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultCachedAudio) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "audio",
-		ID:                  v.ID,
-		AudioFileID:         v.AudioFileID,
+		Id:                  v.Id,
+		AudioFileId:         v.AudioFileId,
 		Caption:             v.Caption,
 		ParseMode:           v.ParseMode,
 		CaptionEntities:     v.CaptionEntities,
@@ -2714,11 +2714,11 @@ func (v InlineQueryResultCachedAudio) inlineQueryResult() {}
 // Represents a link to a file stored on the Telegram servers. By default, this file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the file.
 type InlineQueryResultCachedDocument struct {
 	// Unique identifier for this result, 1-64 bytes
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// Title for the result
 	Title string `json:"title"`
 	// A valid file identifier for the file
-	DocumentFileID string `json:"document_file_id"`
+	DocumentFileId string `json:"document_file_id"`
 	// Optional. Short description of the result
 	Description string `json:"description,omitempty"`
 	// Optional. Caption of the document to be sent, 0-1024 characters after entities parsing
@@ -2738,18 +2738,18 @@ func (v InlineQueryResultCachedDocument) GetType() string {
 	return "document"
 }
 
-// GetID is a helper method to easily access the common fields of an interface.
-func (v InlineQueryResultCachedDocument) GetID() string {
-	return v.ID
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultCachedDocument) GetId() string {
+	return v.Id
 }
 
 // MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultCachedDocument) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "document",
-		ID:                  v.ID,
+		Id:                  v.Id,
 		Title:               v.Title,
-		DocumentFileID:      v.DocumentFileID,
+		DocumentFileId:      v.DocumentFileId,
 		Description:         v.Description,
 		Caption:             v.Caption,
 		ParseMode:           v.ParseMode,
@@ -2780,9 +2780,9 @@ func (v InlineQueryResultCachedDocument) inlineQueryResult() {}
 // Represents a link to an animated GIF file stored on the Telegram servers. By default, this animated GIF file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with specified content instead of the animation.
 type InlineQueryResultCachedGif struct {
 	// Unique identifier for this result, 1-64 bytes
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// A valid file identifier for the GIF file
-	GifFileID string `json:"gif_file_id"`
+	GifFileId string `json:"gif_file_id"`
 	// Optional. Title for the result
 	Title string `json:"title,omitempty"`
 	// Optional. Caption of the GIF file to be sent, 0-1024 characters after entities parsing
@@ -2802,17 +2802,17 @@ func (v InlineQueryResultCachedGif) GetType() string {
 	return "gif"
 }
 
-// GetID is a helper method to easily access the common fields of an interface.
-func (v InlineQueryResultCachedGif) GetID() string {
-	return v.ID
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultCachedGif) GetId() string {
+	return v.Id
 }
 
 // MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultCachedGif) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "gif",
-		ID:                  v.ID,
-		GifFileID:           v.GifFileID,
+		Id:                  v.Id,
+		GifFileId:           v.GifFileId,
 		Title:               v.Title,
 		Caption:             v.Caption,
 		ParseMode:           v.ParseMode,
@@ -2843,9 +2843,9 @@ func (v InlineQueryResultCachedGif) inlineQueryResult() {}
 // Represents a link to a video animation (H.264/MPEG-4 AVC video without sound) stored on the Telegram servers. By default, this animated MPEG-4 file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the animation.
 type InlineQueryResultCachedMpeg4Gif struct {
 	// Unique identifier for this result, 1-64 bytes
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// A valid file identifier for the MPEG4 file
-	Mpeg4FileID string `json:"mpeg4_file_id"`
+	Mpeg4FileId string `json:"mpeg4_file_id"`
 	// Optional. Title for the result
 	Title string `json:"title,omitempty"`
 	// Optional. Caption of the MPEG-4 file to be sent, 0-1024 characters after entities parsing
@@ -2865,17 +2865,17 @@ func (v InlineQueryResultCachedMpeg4Gif) GetType() string {
 	return "mpeg4_gif"
 }
 
-// GetID is a helper method to easily access the common fields of an interface.
-func (v InlineQueryResultCachedMpeg4Gif) GetID() string {
-	return v.ID
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultCachedMpeg4Gif) GetId() string {
+	return v.Id
 }
 
 // MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultCachedMpeg4Gif) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "mpeg4_gif",
-		ID:                  v.ID,
-		Mpeg4FileID:         v.Mpeg4FileID,
+		Id:                  v.Id,
+		Mpeg4FileId:         v.Mpeg4FileId,
 		Title:               v.Title,
 		Caption:             v.Caption,
 		ParseMode:           v.ParseMode,
@@ -2906,9 +2906,9 @@ func (v InlineQueryResultCachedMpeg4Gif) inlineQueryResult() {}
 // Represents a link to a photo stored on the Telegram servers. By default, this photo will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the photo.
 type InlineQueryResultCachedPhoto struct {
 	// Unique identifier for this result, 1-64 bytes
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// A valid file identifier of the photo
-	PhotoFileID string `json:"photo_file_id"`
+	PhotoFileId string `json:"photo_file_id"`
 	// Optional. Title for the result
 	Title string `json:"title,omitempty"`
 	// Optional. Short description of the result
@@ -2930,17 +2930,17 @@ func (v InlineQueryResultCachedPhoto) GetType() string {
 	return "photo"
 }
 
-// GetID is a helper method to easily access the common fields of an interface.
-func (v InlineQueryResultCachedPhoto) GetID() string {
-	return v.ID
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultCachedPhoto) GetId() string {
+	return v.Id
 }
 
 // MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultCachedPhoto) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "photo",
-		ID:                  v.ID,
-		PhotoFileID:         v.PhotoFileID,
+		Id:                  v.Id,
+		PhotoFileId:         v.PhotoFileId,
 		Title:               v.Title,
 		Description:         v.Description,
 		Caption:             v.Caption,
@@ -2972,9 +2972,9 @@ func (v InlineQueryResultCachedPhoto) inlineQueryResult() {}
 // Represents a link to a sticker stored on the Telegram servers. By default, this sticker will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the sticker.
 type InlineQueryResultCachedSticker struct {
 	// Unique identifier for this result, 1-64 bytes
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// A valid file identifier of the sticker
-	StickerFileID string `json:"sticker_file_id"`
+	StickerFileId string `json:"sticker_file_id"`
 	// Optional. Inline keyboard attached to the message
 	ReplyMarkup *InlineKeyboardMarkup `json:"reply_markup,omitempty"`
 	// Optional. Content of the message to be sent instead of the sticker
@@ -2986,17 +2986,17 @@ func (v InlineQueryResultCachedSticker) GetType() string {
 	return "sticker"
 }
 
-// GetID is a helper method to easily access the common fields of an interface.
-func (v InlineQueryResultCachedSticker) GetID() string {
-	return v.ID
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultCachedSticker) GetId() string {
+	return v.Id
 }
 
 // MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultCachedSticker) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "sticker",
-		ID:                  v.ID,
-		StickerFileID:       v.StickerFileID,
+		Id:                  v.Id,
+		StickerFileId:       v.StickerFileId,
 		ReplyMarkup:         v.ReplyMarkup,
 		InputMessageContent: v.InputMessageContent,
 	}
@@ -3023,9 +3023,9 @@ func (v InlineQueryResultCachedSticker) inlineQueryResult() {}
 // Represents a link to a video file stored on the Telegram servers. By default, this video file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the video.
 type InlineQueryResultCachedVideo struct {
 	// Unique identifier for this result, 1-64 bytes
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// A valid file identifier for the video file
-	VideoFileID string `json:"video_file_id"`
+	VideoFileId string `json:"video_file_id"`
 	// Title for the result
 	Title string `json:"title"`
 	// Optional. Short description of the result
@@ -3047,17 +3047,17 @@ func (v InlineQueryResultCachedVideo) GetType() string {
 	return "video"
 }
 
-// GetID is a helper method to easily access the common fields of an interface.
-func (v InlineQueryResultCachedVideo) GetID() string {
-	return v.ID
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultCachedVideo) GetId() string {
+	return v.Id
 }
 
 // MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultCachedVideo) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "video",
-		ID:                  v.ID,
-		VideoFileID:         v.VideoFileID,
+		Id:                  v.Id,
+		VideoFileId:         v.VideoFileId,
 		Title:               v.Title,
 		Description:         v.Description,
 		Caption:             v.Caption,
@@ -3089,9 +3089,9 @@ func (v InlineQueryResultCachedVideo) inlineQueryResult() {}
 // Represents a link to a voice message stored on the Telegram servers. By default, this voice message will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the voice message.
 type InlineQueryResultCachedVoice struct {
 	// Unique identifier for this result, 1-64 bytes
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// A valid file identifier for the voice message
-	VoiceFileID string `json:"voice_file_id"`
+	VoiceFileId string `json:"voice_file_id"`
 	// Voice message title
 	Title string `json:"title"`
 	// Optional. Caption, 0-1024 characters after entities parsing
@@ -3111,17 +3111,17 @@ func (v InlineQueryResultCachedVoice) GetType() string {
 	return "voice"
 }
 
-// GetID is a helper method to easily access the common fields of an interface.
-func (v InlineQueryResultCachedVoice) GetID() string {
-	return v.ID
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultCachedVoice) GetId() string {
+	return v.Id
 }
 
 // MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultCachedVoice) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "voice",
-		ID:                  v.ID,
-		VoiceFileID:         v.VoiceFileID,
+		Id:                  v.Id,
+		VoiceFileId:         v.VoiceFileId,
 		Title:               v.Title,
 		Caption:             v.Caption,
 		ParseMode:           v.ParseMode,
@@ -3152,7 +3152,7 @@ func (v InlineQueryResultCachedVoice) inlineQueryResult() {}
 // Represents a contact with a phone number. By default, this contact will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the contact.
 type InlineQueryResultContact struct {
 	// Unique identifier for this result, 1-64 Bytes
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// Contact's phone number
 	PhoneNumber string `json:"phone_number"`
 	// Contact's first name
@@ -3178,16 +3178,16 @@ func (v InlineQueryResultContact) GetType() string {
 	return "contact"
 }
 
-// GetID is a helper method to easily access the common fields of an interface.
-func (v InlineQueryResultContact) GetID() string {
-	return v.ID
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultContact) GetId() string {
+	return v.Id
 }
 
 // MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultContact) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "contact",
-		ID:                  v.ID,
+		Id:                  v.Id,
 		PhoneNumber:         v.PhoneNumber,
 		FirstName:           v.FirstName,
 		LastName:            v.LastName,
@@ -3221,7 +3221,7 @@ func (v InlineQueryResultContact) inlineQueryResult() {}
 // Represents a link to a file. By default, this file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the file. Currently, only .PDF and .ZIP files can be sent using this method.
 type InlineQueryResultDocument struct {
 	// Unique identifier for this result, 1-64 bytes
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// Title for the result
 	Title string `json:"title"`
 	// Optional. Caption of the document to be sent, 0-1024 characters after entities parsing
@@ -3253,16 +3253,16 @@ func (v InlineQueryResultDocument) GetType() string {
 	return "document"
 }
 
-// GetID is a helper method to easily access the common fields of an interface.
-func (v InlineQueryResultDocument) GetID() string {
-	return v.ID
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultDocument) GetId() string {
+	return v.Id
 }
 
 // MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultDocument) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "document",
-		ID:                  v.ID,
+		Id:                  v.Id,
 		Title:               v.Title,
 		Caption:             v.Caption,
 		ParseMode:           v.ParseMode,
@@ -3299,7 +3299,7 @@ func (v InlineQueryResultDocument) inlineQueryResult() {}
 // Represents a Game.
 type InlineQueryResultGame struct {
 	// Unique identifier for this result, 1-64 bytes
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// Short name of the game
 	GameShortName string `json:"game_short_name"`
 	// Optional. Inline keyboard attached to the message
@@ -3311,16 +3311,16 @@ func (v InlineQueryResultGame) GetType() string {
 	return "game"
 }
 
-// GetID is a helper method to easily access the common fields of an interface.
-func (v InlineQueryResultGame) GetID() string {
-	return v.ID
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultGame) GetId() string {
+	return v.Id
 }
 
 // MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultGame) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:          "game",
-		ID:            v.ID,
+		Id:            v.Id,
 		GameShortName: v.GameShortName,
 		ReplyMarkup:   v.ReplyMarkup,
 	}
@@ -3347,7 +3347,7 @@ func (v InlineQueryResultGame) inlineQueryResult() {}
 // Represents a link to an animated GIF file. By default, this animated GIF file will be sent by the user with optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the animation.
 type InlineQueryResultGif struct {
 	// Unique identifier for this result, 1-64 bytes
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// A valid URL for the GIF file. File size must not exceed 1MB
 	GifUrl string `json:"gif_url"`
 	// Optional. Width of the GIF
@@ -3379,16 +3379,16 @@ func (v InlineQueryResultGif) GetType() string {
 	return "gif"
 }
 
-// GetID is a helper method to easily access the common fields of an interface.
-func (v InlineQueryResultGif) GetID() string {
-	return v.ID
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultGif) GetId() string {
+	return v.Id
 }
 
 // MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultGif) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "gif",
-		ID:                  v.ID,
+		Id:                  v.Id,
 		GifUrl:              v.GifUrl,
 		GifWidth:            v.GifWidth,
 		GifHeight:           v.GifHeight,
@@ -3425,7 +3425,7 @@ func (v InlineQueryResultGif) inlineQueryResult() {}
 // Represents a location on a map. By default, the location will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the location.
 type InlineQueryResultLocation struct {
 	// Unique identifier for this result, 1-64 Bytes
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// Location latitude in degrees
 	Latitude float64 `json:"latitude"`
 	// Location longitude in degrees
@@ -3457,16 +3457,16 @@ func (v InlineQueryResultLocation) GetType() string {
 	return "location"
 }
 
-// GetID is a helper method to easily access the common fields of an interface.
-func (v InlineQueryResultLocation) GetID() string {
-	return v.ID
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultLocation) GetId() string {
+	return v.Id
 }
 
 // MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultLocation) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                 "location",
-		ID:                   v.ID,
+		Id:                   v.Id,
 		Latitude:             v.Latitude,
 		Longitude:            v.Longitude,
 		Title:                v.Title,
@@ -3503,7 +3503,7 @@ func (v InlineQueryResultLocation) inlineQueryResult() {}
 // Represents a link to a video animation (H.264/MPEG-4 AVC video without sound). By default, this animated MPEG-4 file will be sent by the user with optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the animation.
 type InlineQueryResultMpeg4Gif struct {
 	// Unique identifier for this result, 1-64 bytes
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// A valid URL for the MPEG4 file. File size must not exceed 1MB
 	Mpeg4Url string `json:"mpeg4_url"`
 	// Optional. Video width
@@ -3535,16 +3535,16 @@ func (v InlineQueryResultMpeg4Gif) GetType() string {
 	return "mpeg4_gif"
 }
 
-// GetID is a helper method to easily access the common fields of an interface.
-func (v InlineQueryResultMpeg4Gif) GetID() string {
-	return v.ID
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultMpeg4Gif) GetId() string {
+	return v.Id
 }
 
 // MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultMpeg4Gif) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "mpeg4_gif",
-		ID:                  v.ID,
+		Id:                  v.Id,
 		Mpeg4Url:            v.Mpeg4Url,
 		Mpeg4Width:          v.Mpeg4Width,
 		Mpeg4Height:         v.Mpeg4Height,
@@ -3581,7 +3581,7 @@ func (v InlineQueryResultMpeg4Gif) inlineQueryResult() {}
 // Represents a link to a photo. By default, this photo will be sent by the user with optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the photo.
 type InlineQueryResultPhoto struct {
 	// Unique identifier for this result, 1-64 bytes
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// A valid URL of the photo. Photo must be in JPEG format. Photo size must not exceed 5MB
 	PhotoUrl string `json:"photo_url"`
 	// URL of the thumbnail for the photo
@@ -3611,16 +3611,16 @@ func (v InlineQueryResultPhoto) GetType() string {
 	return "photo"
 }
 
-// GetID is a helper method to easily access the common fields of an interface.
-func (v InlineQueryResultPhoto) GetID() string {
-	return v.ID
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultPhoto) GetId() string {
+	return v.Id
 }
 
 // MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultPhoto) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "photo",
-		ID:                  v.ID,
+		Id:                  v.Id,
 		PhotoUrl:            v.PhotoUrl,
 		ThumbnailUrl:        v.ThumbnailUrl,
 		PhotoWidth:          v.PhotoWidth,
@@ -3656,7 +3656,7 @@ func (v InlineQueryResultPhoto) inlineQueryResult() {}
 // Represents a venue. By default, the venue will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the venue.
 type InlineQueryResultVenue struct {
 	// Unique identifier for this result, 1-64 Bytes
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// Latitude of the venue location in degrees
 	Latitude float64 `json:"latitude"`
 	// Longitude of the venue location in degrees
@@ -3666,11 +3666,11 @@ type InlineQueryResultVenue struct {
 	// Address of the venue
 	Address string `json:"address"`
 	// Optional. Foursquare identifier of the venue if known
-	FoursquareID string `json:"foursquare_id,omitempty"`
+	FoursquareId string `json:"foursquare_id,omitempty"`
 	// Optional. Foursquare type of the venue, if known. (For example, "arts_entertainment/default", "arts_entertainment/aquarium" or "food/icecream".)
 	FoursquareType string `json:"foursquare_type,omitempty"`
 	// Optional. Google Places identifier of the venue
-	GooglePlaceID string `json:"google_place_id,omitempty"`
+	GooglePlaceId string `json:"google_place_id,omitempty"`
 	// Optional. Google Places type of the venue. (See supported types.)
 	GooglePlaceType string `json:"google_place_type,omitempty"`
 	// Optional. Inline keyboard attached to the message
@@ -3690,23 +3690,23 @@ func (v InlineQueryResultVenue) GetType() string {
 	return "venue"
 }
 
-// GetID is a helper method to easily access the common fields of an interface.
-func (v InlineQueryResultVenue) GetID() string {
-	return v.ID
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultVenue) GetId() string {
+	return v.Id
 }
 
 // MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultVenue) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "venue",
-		ID:                  v.ID,
+		Id:                  v.Id,
 		Latitude:            v.Latitude,
 		Longitude:           v.Longitude,
 		Title:               v.Title,
 		Address:             v.Address,
-		FoursquareID:        v.FoursquareID,
+		FoursquareId:        v.FoursquareId,
 		FoursquareType:      v.FoursquareType,
-		GooglePlaceID:       v.GooglePlaceID,
+		GooglePlaceId:       v.GooglePlaceId,
 		GooglePlaceType:     v.GooglePlaceType,
 		ReplyMarkup:         v.ReplyMarkup,
 		InputMessageContent: v.InputMessageContent,
@@ -3737,7 +3737,7 @@ func (v InlineQueryResultVenue) inlineQueryResult() {}
 // Represents a link to a page containing an embedded video player or a video file. By default, this video file will be sent by the user with an optional caption. Alternatively, you can use input_message_content to send a message with the specified content instead of the video.
 type InlineQueryResultVideo struct {
 	// Unique identifier for this result, 1-64 bytes
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// A valid URL for the embedded video player or video file
 	VideoUrl string `json:"video_url"`
 	// MIME type of the content of the video URL, "text/html" or "video/mp4"
@@ -3771,16 +3771,16 @@ func (v InlineQueryResultVideo) GetType() string {
 	return "video"
 }
 
-// GetID is a helper method to easily access the common fields of an interface.
-func (v InlineQueryResultVideo) GetID() string {
-	return v.ID
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultVideo) GetId() string {
+	return v.Id
 }
 
 // MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultVideo) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "video",
-		ID:                  v.ID,
+		Id:                  v.Id,
 		VideoUrl:            v.VideoUrl,
 		MimeType:            v.MimeType,
 		ThumbnailUrl:        v.ThumbnailUrl,
@@ -3818,7 +3818,7 @@ func (v InlineQueryResultVideo) inlineQueryResult() {}
 // Represents a link to a voice recording in an .OGG container encoded with OPUS. By default, this voice recording will be sent by the user. Alternatively, you can use input_message_content to send a message with the specified content instead of the the voice message.
 type InlineQueryResultVoice struct {
 	// Unique identifier for this result, 1-64 bytes
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// A valid URL for the voice recording
 	VoiceUrl string `json:"voice_url"`
 	// Recording title
@@ -3842,16 +3842,16 @@ func (v InlineQueryResultVoice) GetType() string {
 	return "voice"
 }
 
-// GetID is a helper method to easily access the common fields of an interface.
-func (v InlineQueryResultVoice) GetID() string {
-	return v.ID
+// GetId is a helper method to easily access the common fields of an interface.
+func (v InlineQueryResultVoice) GetId() string {
+	return v.Id
 }
 
 // MergeInlineQueryResult returns a MergedInlineQueryResult struct to simplify working with types in a non-generic world.
 func (v InlineQueryResultVoice) MergeInlineQueryResult() MergedInlineQueryResult {
 	return MergedInlineQueryResult{
 		Type:                "voice",
-		ID:                  v.ID,
+		Id:                  v.Id,
 		VoiceUrl:            v.VoiceUrl,
 		Title:               v.Title,
 		Caption:             v.Caption,
@@ -4570,11 +4570,11 @@ type InputVenueMessageContent struct {
 	// Address of the venue
 	Address string `json:"address"`
 	// Optional. Foursquare identifier of the venue, if known
-	FoursquareID string `json:"foursquare_id,omitempty"`
+	FoursquareId string `json:"foursquare_id,omitempty"`
 	// Optional. Foursquare type of the venue, if known. (For example, "arts_entertainment/default", "arts_entertainment/aquarium" or "food/icecream".)
 	FoursquareType string `json:"foursquare_type,omitempty"`
 	// Optional. Google Places identifier of the venue
-	GooglePlaceID string `json:"google_place_id,omitempty"`
+	GooglePlaceId string `json:"google_place_id,omitempty"`
 	// Optional. Google Places type of the venue. (See supported types.)
 	GooglePlaceType string `json:"google_place_type,omitempty"`
 }
@@ -4629,10 +4629,10 @@ type KeyboardButtonPollType struct {
 
 // KeyboardButtonRequestChat (https://core.telegram.org/bots/api#keyboardbuttonrequestchat)
 //
-// This object defines the criteria used to request a suitable chat. Information about the selected chat will be shared with the bot when the corresponding button is pressed. The bot will be granted requested rights in the сhat if appropriate More about requesting chats: https://core.telegram.org/bots/features#chat-and-user-selection
+// This object defines the criteria used to request a suitable chat. Information about the selected chat will be shared with the bot when the corresponding button is pressed. The bot will be granted requested rights in the chat if appropriate. More about requesting chats: https://core.telegram.org/bots/features#chat-and-user-selection.
 type KeyboardButtonRequestChat struct {
 	// Signed 32-bit identifier of the request, which will be received back in the ChatShared object. Must be unique within the message
-	RequestID int64 `json:"request_id"`
+	RequestId int64 `json:"request_id"`
 	// Pass True to request a channel chat, pass False to request a group or a supergroup chat.
 	ChatIsChannel bool `json:"chat_is_channel"`
 	// Optional. Pass True to request a forum supergroup, pass False to request a non-forum chat. If not specified, no additional restrictions are applied.
@@ -4660,18 +4660,18 @@ type KeyboardButtonRequestChat struct {
 // This object defines the criteria used to request suitable users. Information about the selected users will be shared with the bot when the corresponding button is pressed. More about requesting users: https://core.telegram.org/bots/features#chat-and-user-selection
 type KeyboardButtonRequestUsers struct {
 	// Signed 32-bit identifier of the request that will be received back in the UsersShared object. Must be unique within the message
-	RequestID int64 `json:"request_id"`
+	RequestId int64 `json:"request_id"`
 	// Optional. Pass True to request bots, pass False to request regular users. If not specified, no additional restrictions are applied.
 	UserIsBot *bool `json:"user_is_bot,omitempty"`
 	// Optional. Pass True to request premium users, pass False to request non-premium users. If not specified, no additional restrictions are applied.
 	UserIsPremium *bool `json:"user_is_premium,omitempty"`
 	// Optional. The maximum number of users to be selected; 1-10. Defaults to 1.
 	MaxQuantity int64 `json:"max_quantity,omitempty"`
-	// Optional. Pass True to request the users' first and last name
+	// Optional. Pass True to request the users' first and last names
 	RequestName bool `json:"request_name,omitempty"`
-	// Optional. Pass True to request the users' username
+	// Optional. Pass True to request the users' usernames
 	RequestUsername bool `json:"request_username,omitempty"`
-	// Optional. Pass True to request the users' photo
+	// Optional. Pass True to request the users' photos
 	RequestPhoto bool `json:"request_photo,omitempty"`
 }
 
@@ -4754,7 +4754,7 @@ type MaskPosition struct {
 //   - Message
 //   - InaccessibleMessage
 type MaybeInaccessibleMessage interface {
-	GetMessageID() int64
+	GetMessageId() int64
 	GetDate() int64
 	GetChat() Chat
 	// maybeInaccessibleMessage exists to avoid external types implementing this interface.
@@ -4762,7 +4762,7 @@ type MaybeInaccessibleMessage interface {
 
 	// Helper methods shared across all subtypes of this interface.
 	// Copy Helper method for Bot.CopyMessage.
-	Copy(b *Bot, chatID int64, opts *CopyMessageOpts) (*MessageID, error)
+	Copy(b *Bot, chatId int64, opts *CopyMessageOpts) (*MessageId, error)
 	// Delete Helper method for Bot.DeleteMessage.
 	Delete(b *Bot, opts *DeleteMessageOpts) (bool, error)
 	// EditCaption Helper method for Bot.EditMessageCaption.
@@ -4776,7 +4776,7 @@ type MaybeInaccessibleMessage interface {
 	// EditText Helper method for Bot.EditMessageText.
 	EditText(b *Bot, text string, opts *EditMessageTextOpts) (*Message, bool, error)
 	// Forward Helper method for Bot.ForwardMessage.
-	Forward(b *Bot, chatID int64, opts *ForwardMessageOpts) (*Message, error)
+	Forward(b *Bot, chatId int64, opts *ForwardMessageOpts) (*Message, error)
 	// Pin Helper method for Bot.PinChatMessage.
 	Pin(b *Bot, opts *PinChatMessageOpts) (bool, error)
 	// SetReaction Helper method for Bot.SetMessageReaction.
@@ -5019,9 +5019,9 @@ func (v MenuButtonWebApp) menuButton() {}
 // This object represents a message.
 type Message struct {
 	// Unique message identifier inside this chat
-	MessageID int64 `json:"message_id"`
+	MessageId int64 `json:"message_id"`
 	// Optional. Unique identifier of a message thread to which the message belongs; for supergroups only
-	MessageThreadID int64 `json:"message_thread_id,omitempty"`
+	MessageThreadId int64 `json:"message_thread_id,omitempty"`
 	// Optional. Sender of the message; empty for messages sent to channels. For backward compatibility, the field contains a fake sender user in non-channel chats, if the message was sent on behalf of a chat.
 	From *User `json:"from,omitempty"`
 	// Optional. Sender of the message, sent on behalf of a chat. For example, the channel itself for channel posts, the supergroup itself for messages from anonymous group administrators, the linked channel for messages automatically forwarded to the discussion group. For backward compatibility, the field from contains a fake sender user in non-channel chats, if the message was sent on behalf of a chat.
@@ -5033,7 +5033,7 @@ type Message struct {
 	// Date the message was sent in Unix time. It is always a positive number, representing a valid date.
 	Date int64 `json:"date"`
 	// Optional. Unique identifier of the business connection from which the message was received. If non-empty, the message belongs to a chat of the corresponding business account that is independent from any potential bot chat which might share the same identifier.
-	BusinessConnectionID string `json:"business_connection_id,omitempty"`
+	BusinessConnectionId string `json:"business_connection_id,omitempty"`
 	// Chat the message belongs to
 	Chat Chat `json:"chat"`
 	// Optional. Information about the original message for forwarded messages
@@ -5059,7 +5059,7 @@ type Message struct {
 	// Optional. True, if the message was sent by an implicit action, for example, as an away or a greeting business message, or as a scheduled message
 	IsFromOffline bool `json:"is_from_offline,omitempty"`
 	// Optional. The unique identifier of a media message group this message belongs to
-	MediaGroupID string `json:"media_group_id,omitempty"`
+	MediaGroupId string `json:"media_group_id,omitempty"`
 	// Optional. Signature of the post author for messages in channels, or the custom title of an anonymous group administrator
 	AuthorSignature string `json:"author_signature,omitempty"`
 	// Optional. For text messages, the actual UTF-8 text of the message
@@ -5123,9 +5123,9 @@ type Message struct {
 	// Optional. Service message: auto-delete timer settings changed in the chat
 	MessageAutoDeleteTimerChanged *MessageAutoDeleteTimerChanged `json:"message_auto_delete_timer_changed,omitempty"`
 	// Optional. The group has been migrated to a supergroup with the specified identifier. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this identifier.
-	MigrateToChatID int64 `json:"migrate_to_chat_id,omitempty"`
+	MigrateToChatId int64 `json:"migrate_to_chat_id,omitempty"`
 	// Optional. The supergroup has been migrated from a group with the specified identifier. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this identifier.
-	MigrateFromChatID int64 `json:"migrate_from_chat_id,omitempty"`
+	MigrateFromChatId int64 `json:"migrate_from_chat_id,omitempty"`
 	// Optional. Specified message was pinned. Note that the Message object in this field will not contain further reply_to_message fields even if it itself is a reply.
 	PinnedMessage MaybeInaccessibleMessage `json:"pinned_message,omitempty"`
 	// Optional. Message is an invoice for a payment, information about the invoice. More about payments: https://core.telegram.org/bots/api#payments
@@ -5184,14 +5184,14 @@ type Message struct {
 func (v *Message) UnmarshalJSON(b []byte) error {
 	// All fields in Message, with interface fields as json.RawMessage
 	type tmp struct {
-		MessageID                     int64                          `json:"message_id"`
-		MessageThreadID               int64                          `json:"message_thread_id"`
+		MessageId                     int64                          `json:"message_id"`
+		MessageThreadId               int64                          `json:"message_thread_id"`
 		From                          *User                          `json:"from"`
 		SenderChat                    *Chat                          `json:"sender_chat"`
 		SenderBoostCount              int64                          `json:"sender_boost_count"`
 		SenderBusinessBot             *User                          `json:"sender_business_bot"`
 		Date                          int64                          `json:"date"`
-		BusinessConnectionID          string                         `json:"business_connection_id"`
+		BusinessConnectionId          string                         `json:"business_connection_id"`
 		Chat                          Chat                           `json:"chat"`
 		ForwardOrigin                 json.RawMessage                `json:"forward_origin"`
 		IsTopicMessage                bool                           `json:"is_topic_message"`
@@ -5204,7 +5204,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 		EditDate                      int64                          `json:"edit_date"`
 		HasProtectedContent           bool                           `json:"has_protected_content"`
 		IsFromOffline                 bool                           `json:"is_from_offline"`
-		MediaGroupID                  string                         `json:"media_group_id"`
+		MediaGroupId                  string                         `json:"media_group_id"`
 		AuthorSignature               string                         `json:"author_signature"`
 		Text                          string                         `json:"text"`
 		Entities                      []MessageEntity                `json:"entities"`
@@ -5236,8 +5236,8 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 		SupergroupChatCreated         bool                           `json:"supergroup_chat_created"`
 		ChannelChatCreated            bool                           `json:"channel_chat_created"`
 		MessageAutoDeleteTimerChanged *MessageAutoDeleteTimerChanged `json:"message_auto_delete_timer_changed"`
-		MigrateToChatID               int64                          `json:"migrate_to_chat_id"`
-		MigrateFromChatID             int64                          `json:"migrate_from_chat_id"`
+		MigrateToChatId               int64                          `json:"migrate_to_chat_id"`
+		MigrateFromChatId             int64                          `json:"migrate_from_chat_id"`
 		PinnedMessage                 json.RawMessage                `json:"pinned_message"`
 		Invoice                       *Invoice                       `json:"invoice"`
 		SuccessfulPayment             *SuccessfulPayment             `json:"successful_payment"`
@@ -5271,14 +5271,14 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 		return fmt.Errorf("failed to unmarshal Message JSON into tmp struct: %w", err)
 	}
 
-	v.MessageID = t.MessageID
-	v.MessageThreadID = t.MessageThreadID
+	v.MessageId = t.MessageId
+	v.MessageThreadId = t.MessageThreadId
 	v.From = t.From
 	v.SenderChat = t.SenderChat
 	v.SenderBoostCount = t.SenderBoostCount
 	v.SenderBusinessBot = t.SenderBusinessBot
 	v.Date = t.Date
-	v.BusinessConnectionID = t.BusinessConnectionID
+	v.BusinessConnectionId = t.BusinessConnectionId
 	v.Chat = t.Chat
 	v.ForwardOrigin, err = unmarshalMessageOrigin(t.ForwardOrigin)
 	if err != nil {
@@ -5294,7 +5294,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 	v.EditDate = t.EditDate
 	v.HasProtectedContent = t.HasProtectedContent
 	v.IsFromOffline = t.IsFromOffline
-	v.MediaGroupID = t.MediaGroupID
+	v.MediaGroupId = t.MediaGroupId
 	v.AuthorSignature = t.AuthorSignature
 	v.Text = t.Text
 	v.Entities = t.Entities
@@ -5326,8 +5326,8 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 	v.SupergroupChatCreated = t.SupergroupChatCreated
 	v.ChannelChatCreated = t.ChannelChatCreated
 	v.MessageAutoDeleteTimerChanged = t.MessageAutoDeleteTimerChanged
-	v.MigrateToChatID = t.MigrateToChatID
-	v.MigrateFromChatID = t.MigrateFromChatID
+	v.MigrateToChatId = t.MigrateToChatId
+	v.MigrateFromChatId = t.MigrateFromChatId
 	v.PinnedMessage, err = unmarshalMaybeInaccessibleMessage(t.PinnedMessage)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal custom JSON field PinnedMessage: %w", err)
@@ -5361,9 +5361,9 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// GetMessageID is a helper method to easily access the common fields of an interface.
-func (v Message) GetMessageID() int64 {
-	return v.MessageID
+// GetMessageId is a helper method to easily access the common fields of an interface.
+func (v Message) GetMessageId() int64 {
+	return v.MessageId
 }
 
 // GetDate is a helper method to easily access the common fields of an interface.
@@ -5404,15 +5404,15 @@ type MessageEntity struct {
 	// Optional. For "pre" only, the programming language of the entity text
 	Language string `json:"language,omitempty"`
 	// Optional. For "custom_emoji" only, unique identifier of the custom emoji. Use getCustomEmojiStickers to get full information about the sticker
-	CustomEmojiID string `json:"custom_emoji_id,omitempty"`
+	CustomEmojiId string `json:"custom_emoji_id,omitempty"`
 }
 
-// MessageID (https://core.telegram.org/bots/api#messageid)
+// MessageId (https://core.telegram.org/bots/api#messageid)
 //
 // This object represents a unique message identifier.
-type MessageID struct {
+type MessageId struct {
 	// Unique message identifier
-	MessageID int64 `json:"message_id"`
+	MessageId int64 `json:"message_id"`
 }
 
 // MessageOrigin (https://core.telegram.org/bots/api#messageorigin)
@@ -5456,7 +5456,7 @@ type MergedMessageOrigin struct {
 	// Optional. Channel chat to which the message was originally sent (Only for channel)
 	Chat *Chat `json:"chat,omitempty"`
 	// Optional. Unique message identifier inside the chat (Only for channel)
-	MessageID int64 `json:"message_id,omitempty"`
+	MessageId int64 `json:"message_id,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -5563,7 +5563,7 @@ type MessageOriginChannel struct {
 	// Channel chat to which the message was originally sent
 	Chat Chat `json:"chat"`
 	// Unique message identifier inside the chat
-	MessageID int64 `json:"message_id"`
+	MessageId int64 `json:"message_id"`
 	// Optional. Signature of the original post author
 	AuthorSignature string `json:"author_signature,omitempty"`
 }
@@ -5584,7 +5584,7 @@ func (v MessageOriginChannel) MergeMessageOrigin() MergedMessageOrigin {
 		Type:            "channel",
 		Date:            v.Date,
 		Chat:            &v.Chat,
-		MessageID:       v.MessageID,
+		MessageId:       v.MessageId,
 		AuthorSignature: v.AuthorSignature,
 	}
 }
@@ -5750,7 +5750,7 @@ type MessageReactionCountUpdated struct {
 	// The chat containing the message
 	Chat Chat `json:"chat"`
 	// Unique message identifier inside the chat
-	MessageID int64 `json:"message_id"`
+	MessageId int64 `json:"message_id"`
 	// Date of the change in Unix time
 	Date int64 `json:"date"`
 	// List of reactions that are present on the message
@@ -5764,7 +5764,7 @@ type MessageReactionUpdated struct {
 	// The chat containing the message the user reacted to
 	Chat Chat `json:"chat"`
 	// Unique identifier of the message inside the chat
-	MessageID int64 `json:"message_id"`
+	MessageId int64 `json:"message_id"`
 	// Optional. The user that changed the reaction, if the user isn't anonymous
 	User *User `json:"user,omitempty"`
 	// Optional. The chat on behalf of which the reaction was changed, if the user is anonymous
@@ -5782,7 +5782,7 @@ func (v *MessageReactionUpdated) UnmarshalJSON(b []byte) error {
 	// All fields in MessageReactionUpdated, with interface fields as json.RawMessage
 	type tmp struct {
 		Chat        Chat            `json:"chat"`
-		MessageID   int64           `json:"message_id"`
+		MessageId   int64           `json:"message_id"`
 		User        *User           `json:"user"`
 		ActorChat   *Chat           `json:"actor_chat"`
 		Date        int64           `json:"date"`
@@ -5796,7 +5796,7 @@ func (v *MessageReactionUpdated) UnmarshalJSON(b []byte) error {
 	}
 
 	v.Chat = t.Chat
-	v.MessageID = t.MessageID
+	v.MessageId = t.MessageId
 	v.User = t.User
 	v.ActorChat = t.ActorChat
 	v.Date = t.Date
@@ -6399,9 +6399,9 @@ func (v PassportElementErrorUnspecified) passportElementError() {}
 // This object represents a file uploaded to Telegram Passport. Currently all Telegram Passport files are in JPEG format when decrypted and don't exceed 10MB.
 type PassportFile struct {
 	// Identifier for this file, which can be used to download or reuse the file
-	FileID string `json:"file_id"`
+	FileId string `json:"file_id"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
-	FileUniqueID string `json:"file_unique_id"`
+	FileUniqueId string `json:"file_unique_id"`
 	// File size in bytes
 	FileSize int64 `json:"file_size"`
 	// Unix time when the file was uploaded
@@ -6413,9 +6413,9 @@ type PassportFile struct {
 // This object represents one size of a photo or a file / sticker thumbnail.
 type PhotoSize struct {
 	// Identifier for this file, which can be used to download or reuse the file
-	FileID string `json:"file_id"`
+	FileId string `json:"file_id"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
-	FileUniqueID string `json:"file_unique_id"`
+	FileUniqueId string `json:"file_unique_id"`
 	// Photo width
 	Width int64 `json:"width"`
 	// Photo height
@@ -6429,7 +6429,7 @@ type PhotoSize struct {
 // This object contains information about a poll.
 type Poll struct {
 	// Unique poll identifier
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// Poll question, 1-300 characters
 	Question string `json:"question"`
 	// List of poll options
@@ -6445,7 +6445,7 @@ type Poll struct {
 	// True, if the poll allows multiple answers
 	AllowsMultipleAnswers bool `json:"allows_multiple_answers"`
 	// Optional. 0-based identifier of the correct answer option. Available only for polls in the quiz mode, which are closed, or was sent (not forwarded) by the bot or to the private chat with the bot.
-	CorrectOptionID int64 `json:"correct_option_id,omitempty"`
+	CorrectOptionId int64 `json:"correct_option_id,omitempty"`
 	// Optional. Text that is shown when a user chooses an incorrect answer or taps on the lamp icon in a quiz-style poll, 0-200 characters
 	Explanation string `json:"explanation,omitempty"`
 	// Optional. Special entities like usernames, URLs, bot commands, etc. that appear in the explanation
@@ -6461,13 +6461,13 @@ type Poll struct {
 // This object represents an answer of a user in a non-anonymous poll.
 type PollAnswer struct {
 	// Unique poll identifier
-	PollID string `json:"poll_id"`
+	PollId string `json:"poll_id"`
 	// Optional. The chat that changed the answer to the poll, if the voter is anonymous
 	VoterChat *Chat `json:"voter_chat,omitempty"`
 	// Optional. The user that changed the answer to the poll, if the voter isn't anonymous
 	User *User `json:"user,omitempty"`
 	// 0-based identifiers of chosen answer options. May be empty if the vote was retracted.
-	OptionIDs []int64 `json:"option_ids,omitempty"`
+	OptionIds []int64 `json:"option_ids,omitempty"`
 }
 
 // PollOption (https://core.telegram.org/bots/api#polloption)
@@ -6485,7 +6485,7 @@ type PollOption struct {
 // This object contains information about an incoming pre-checkout query.
 type PreCheckoutQuery struct {
 	// Unique query identifier
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// User who sent the query
 	From User `json:"from"`
 	// Three-letter ISO 4217 currency code
@@ -6495,7 +6495,7 @@ type PreCheckoutQuery struct {
 	// Bot specified invoice payload
 	InvoicePayload string `json:"invoice_payload"`
 	// Optional. Identifier of the shipping option chosen by the user
-	ShippingOptionID string `json:"shipping_option_id,omitempty"`
+	ShippingOptionId string `json:"shipping_option_id,omitempty"`
 	// Optional. Order information provided by the user
 	OrderInfo *OrderInfo `json:"order_info,omitempty"`
 }
@@ -6570,7 +6570,7 @@ type MergedReactionType struct {
 	// Optional. Reaction emoji. Currently, it can be one of "👍", "👎", "❤", "🔥", "🥰", "👏", "😁", "🤔", "🤯", "😱", "🤬", "😢", "🎉", "🤩", "🤮", "💩", "🙏", "👌", "🕊", "🤡", "🥱", "🥴", "😍", "🐳", "❤‍🔥", "🌚", "🌭", "💯", "🤣", "⚡", "🍌", "🏆", "💔", "🤨", "😐", "🍓", "🍾", "💋", "🖕", "😈", "😴", "😭", "🤓", "👻", "👨‍💻", "👀", "🎃", "🙈", "😇", "😨", "🤝", "✍", "🤗", "🫡", "🎅", "🎄", "☃", "💅", "🤪", "🗿", "🆒", "💘", "🙉", "🦄", "😘", "💊", "🙊", "😎", "👾", "🤷‍♂", "🤷", "🤷‍♀", "😡" (Only for emoji)
 	Emoji string `json:"emoji,omitempty"`
 	// Optional. Custom emoji identifier (Only for custom_emoji)
-	CustomEmojiID string `json:"custom_emoji_id,omitempty"`
+	CustomEmojiId string `json:"custom_emoji_id,omitempty"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -6652,7 +6652,7 @@ func unmarshalReactionType(d json.RawMessage) (ReactionType, error) {
 // The reaction is based on a custom emoji.
 type ReactionTypeCustomEmoji struct {
 	// Custom emoji identifier
-	CustomEmojiID string `json:"custom_emoji_id"`
+	CustomEmojiId string `json:"custom_emoji_id"`
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -6664,7 +6664,7 @@ func (v ReactionTypeCustomEmoji) GetType() string {
 func (v ReactionTypeCustomEmoji) MergeReactionType() MergedReactionType {
 	return MergedReactionType{
 		Type:          "custom_emoji",
-		CustomEmojiID: v.CustomEmojiID,
+		CustomEmojiId: v.CustomEmojiId,
 	}
 }
 
@@ -6760,9 +6760,9 @@ func (v ReplyKeyboardRemove) replyMarkup() {}
 // Describes reply parameters for the message that is being sent.
 type ReplyParameters struct {
 	// Identifier of the message that will be replied to in the current chat, or in the chat chat_id if it is specified
-	MessageID int64 `json:"message_id"`
+	MessageId int64 `json:"message_id"`
 	// Optional. If the message to be replied to is from a different chat, unique identifier for the chat or username of the channel (in the format @channelusername). Not supported for messages sent on behalf of a business account.
-	ChatID int64 `json:"chat_id,omitempty"`
+	ChatId int64 `json:"chat_id,omitempty"`
 	// Optional. Pass True if the message should be sent even if the specified message to be replied to is not found. Always False for replies in another chat or forum topic. Always True for messages sent on behalf of a business account.
 	AllowSendingWithoutReply bool `json:"allow_sending_without_reply,omitempty"`
 	// Optional. Quoted part of the message to be replied to; 0-1024 characters after entities parsing. The quote must be an exact substring of the message to be replied to, including bold, italic, underline, strikethrough, spoiler, and custom_emoji entities. The message will fail to send if the quote isn't found in the original message.
@@ -6780,7 +6780,7 @@ type ReplyParameters struct {
 // Describes why a request was unsuccessful.
 type ResponseParameters struct {
 	// Optional. The group has been migrated to a supergroup with the specified identifier. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a signed 64-bit integer or double-precision float type are safe for storing this identifier.
-	MigrateToChatID int64 `json:"migrate_to_chat_id,omitempty"`
+	MigrateToChatId int64 `json:"migrate_to_chat_id,omitempty"`
 	// Optional. In case of exceeding flood control, the number of seconds left to wait before the request can be repeated
 	RetryAfter int64 `json:"retry_after,omitempty"`
 }
@@ -6790,15 +6790,15 @@ type ResponseParameters struct {
 // Describes an inline message sent by a Web App on behalf of a user.
 type SentWebAppMessage struct {
 	// Optional. Identifier of the sent inline message. Available only if there is an inline keyboard attached to the message.
-	InlineMessageID string `json:"inline_message_id,omitempty"`
+	InlineMessageId string `json:"inline_message_id,omitempty"`
 }
 
 // SharedUser (https://core.telegram.org/bots/api#shareduser)
 //
-// This object contains information about a user that was shared with the bot using a KeyboardButtonRequestUser button.
+// This object contains information about a user that was shared with the bot using a KeyboardButtonRequestUsers button.
 type SharedUser struct {
 	// Identifier of the shared user. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so 64-bit integers or double-precision float types are safe for storing these identifiers. The bot may not have access to the user and could be unable to use this identifier, unless the user is already known to the bot by some other means.
-	UserID int64 `json:"user_id"`
+	UserId int64 `json:"user_id"`
 	// Optional. First name of the user, if the name was requested by the bot
 	FirstName string `json:"first_name,omitempty"`
 	// Optional. Last name of the user, if the name was requested by the bot
@@ -6832,7 +6832,7 @@ type ShippingAddress struct {
 // This object represents one shipping option.
 type ShippingOption struct {
 	// Shipping option identifier
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// Option title
 	Title string `json:"title"`
 	// List of price portions
@@ -6844,7 +6844,7 @@ type ShippingOption struct {
 // This object contains information about an incoming shipping query.
 type ShippingQuery struct {
 	// Unique query identifier
-	ID string `json:"id"`
+	Id string `json:"id"`
 	// User who sent the query
 	From User `json:"from"`
 	// Bot specified invoice payload
@@ -6858,9 +6858,9 @@ type ShippingQuery struct {
 // This object represents a sticker.
 type Sticker struct {
 	// Identifier for this file, which can be used to download or reuse the file
-	FileID string `json:"file_id"`
+	FileId string `json:"file_id"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
-	FileUniqueID string `json:"file_unique_id"`
+	FileUniqueId string `json:"file_unique_id"`
 	// Type of the sticker, currently one of "regular", "mask", "custom_emoji". The type of the sticker is independent from its format, which is determined by the fields is_animated and is_video.
 	Type string `json:"type"`
 	// Sticker width
@@ -6882,7 +6882,7 @@ type Sticker struct {
 	// Optional. For mask stickers, the position where the mask should be placed
 	MaskPosition *MaskPosition `json:"mask_position,omitempty"`
 	// Optional. For custom emoji stickers, unique identifier of the custom emoji
-	CustomEmojiID string `json:"custom_emoji_id,omitempty"`
+	CustomEmojiId string `json:"custom_emoji_id,omitempty"`
 	// Optional. True, if the sticker must be repainted to a text color in messages, the color of the Telegram Premium badge in emoji status, white color on chat photos, or another appropriate color in other places
 	NeedsRepainting bool `json:"needs_repainting,omitempty"`
 	// Optional. File size in bytes
@@ -6912,7 +6912,7 @@ type Story struct {
 	// Chat that posted the story
 	Chat Chat `json:"chat"`
 	// Unique identifier for the story in the chat
-	ID int64 `json:"id"`
+	Id int64 `json:"id"`
 }
 
 // SuccessfulPayment (https://core.telegram.org/bots/api#successfulpayment)
@@ -6926,13 +6926,13 @@ type SuccessfulPayment struct {
 	// Bot specified invoice payload
 	InvoicePayload string `json:"invoice_payload"`
 	// Optional. Identifier of the shipping option chosen by the user
-	ShippingOptionID string `json:"shipping_option_id,omitempty"`
+	ShippingOptionId string `json:"shipping_option_id,omitempty"`
 	// Optional. Order information provided by the user
 	OrderInfo *OrderInfo `json:"order_info,omitempty"`
 	// Telegram payment identifier
-	TelegramPaymentChargeID string `json:"telegram_payment_charge_id"`
+	TelegramPaymentChargeId string `json:"telegram_payment_charge_id"`
 	// Provider payment identifier
-	ProviderPaymentChargeID string `json:"provider_payment_charge_id"`
+	ProviderPaymentChargeId string `json:"provider_payment_charge_id"`
 }
 
 // SwitchInlineQueryChosenChat (https://core.telegram.org/bots/api#switchinlinequerychosenchat)
@@ -6971,7 +6971,7 @@ type TextQuote struct {
 // At most one of the optional parameters can be present in any given update.
 type Update struct {
 	// The update's unique identifier. Update identifiers start from a certain positive number and increase sequentially. This identifier becomes especially handy if you're using webhooks, since it allows you to ignore repeated updates or to restore the correct update sequence, should they get out of order. If there are no new updates for at least a week, then identifier of the next update will be chosen randomly instead of sequentially.
-	UpdateID int64 `json:"update_id"`
+	UpdateId int64 `json:"update_id"`
 	// Optional. New incoming message of any kind - text, photo, sticker, etc.
 	Message *Message `json:"message,omitempty"`
 	// Optional. New version of a message that is known to the bot and was edited. This update may at times be triggered by changes to message fields that are either unavailable or not actively used by your bot.
@@ -7023,7 +7023,7 @@ type Update struct {
 // This object represents a Telegram user or bot.
 type User struct {
 	// Unique identifier for this user or bot. This number may have more than 32 significant bits and some programming languages may have difficulty/silent defects in interpreting it. But it has at most 52 significant bits, so a 64-bit integer or double-precision float type are safe for storing this identifier.
-	ID int64 `json:"id"`
+	Id int64 `json:"id"`
 	// True, if this user is a bot
 	IsBot bool `json:"is_bot"`
 	// User's or bot's first name
@@ -7071,7 +7071,7 @@ type UserProfilePhotos struct {
 // This object contains information about the users whose identifiers were shared with the bot using a KeyboardButtonRequestUsers button.
 type UsersShared struct {
 	// Identifier of the request
-	RequestID int64 `json:"request_id"`
+	RequestId int64 `json:"request_id"`
 	// Information about users shared with the bot.
 	Users []SharedUser `json:"users,omitempty"`
 }
@@ -7087,11 +7087,11 @@ type Venue struct {
 	// Address of the venue
 	Address string `json:"address"`
 	// Optional. Foursquare identifier of the venue
-	FoursquareID string `json:"foursquare_id,omitempty"`
+	FoursquareId string `json:"foursquare_id,omitempty"`
 	// Optional. Foursquare type of the venue. (For example, "arts_entertainment/default", "arts_entertainment/aquarium" or "food/icecream".)
 	FoursquareType string `json:"foursquare_type,omitempty"`
 	// Optional. Google Places identifier of the venue
-	GooglePlaceID string `json:"google_place_id,omitempty"`
+	GooglePlaceId string `json:"google_place_id,omitempty"`
 	// Optional. Google Places type of the venue. (See supported types.)
 	GooglePlaceType string `json:"google_place_type,omitempty"`
 }
@@ -7101,9 +7101,9 @@ type Venue struct {
 // This object represents a video file.
 type Video struct {
 	// Identifier for this file, which can be used to download or reuse the file
-	FileID string `json:"file_id"`
+	FileId string `json:"file_id"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
-	FileUniqueID string `json:"file_unique_id"`
+	FileUniqueId string `json:"file_unique_id"`
 	// Video width as defined by sender
 	Width int64 `json:"width"`
 	// Video height as defined by sender
@@ -7154,9 +7154,9 @@ type VideoChatStarted struct{}
 // This object represents a video message (available in Telegram apps as of v.4.0).
 type VideoNote struct {
 	// Identifier for this file, which can be used to download or reuse the file
-	FileID string `json:"file_id"`
+	FileId string `json:"file_id"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
-	FileUniqueID string `json:"file_unique_id"`
+	FileUniqueId string `json:"file_unique_id"`
 	// Video width and height (diameter of the video message) as defined by sender
 	Length int64 `json:"length"`
 	// Duration of the video in seconds as defined by sender
@@ -7172,9 +7172,9 @@ type VideoNote struct {
 // This object represents a voice note.
 type Voice struct {
 	// Identifier for this file, which can be used to download or reuse the file
-	FileID string `json:"file_id"`
+	FileId string `json:"file_id"`
 	// Unique identifier for this file, which is supposed to be the same over time and for different bots. Can't be used to download or reuse the file.
-	FileUniqueID string `json:"file_unique_id"`
+	FileUniqueId string `json:"file_unique_id"`
 	// Duration of the audio in seconds as defined by sender
 	Duration int64 `json:"duration"`
 	// Optional. MIME type of the file as defined by sender
