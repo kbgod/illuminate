@@ -88,7 +88,7 @@ func getOrigMsgMD(utf16Data []uint16, ents []MessageEntity) string {
 				out.WriteString(prevText + pre + mdMap[ent.Type] + ent.Language + "\n" + escapeContainedMDV1(cleanCntntRune, []rune(mdMap[ent.Type])) + mdMap[ent.Type] + post)
 			}
 		case "text_mention":
-			out.WriteString(prevText + pre + "[" + escapeContainedMDV1(cleanCntntRune, []rune("[]()")) + "](tg://user?id=" + strconv.FormatInt(ent.User.ID, 10) + ")" + post)
+			out.WriteString(prevText + pre + "[" + escapeContainedMDV1(cleanCntntRune, []rune("[]()")) + "](tg://user?id=" + strconv.FormatInt(ent.User.Id, 10) + ")" + post)
 		case "text_link":
 			out.WriteString(prevText + pre + "[" + escapeContainedMDV1(cleanCntntRune, []rune("[]()")) + "](" + ent.Url + ")" + post)
 		default:
@@ -202,9 +202,9 @@ func writeFinalHTML(data []uint16, ent MessageEntity, start int64, cntnt string)
 		// <pre><code class="lang">text</code></pre>
 		return prevText + `<pre><code class="` + ent.Language + `">` + cntnt + "</code></pre>"
 	case "custom_emoji":
-		return prevText + `<tg-emoji emoji-id="` + ent.CustomEmojiID + `">` + cntnt + "</tg-emoji>"
+		return prevText + `<tg-emoji emoji-id="` + ent.CustomEmojiId + `">` + cntnt + "</tg-emoji>"
 	case "text_mention":
-		return prevText + `<a href="tg://user?id=` + strconv.FormatInt(ent.User.ID, 10) + `">` + cntnt + "</a>"
+		return prevText + `<a href="tg://user?id=` + strconv.FormatInt(ent.User.Id, 10) + `">` + cntnt + "</a>"
 	case "text_link":
 		return prevText + `<a href="` + ent.Url + `">` + cntnt + "</a>"
 	case "blockquote":
@@ -236,9 +236,9 @@ func writeFinalMarkdownV2(data []uint16, ent MessageEntity, start int64, cntnt s
 	case "custom_emoji":
 		// Yes, custom emoji have a weird little ! at the front
 		// https://core.telegram.org/bots/api#markdownv2-style
-		return prevText + pre + "![" + cleanCntnt + "](tg://emoji?id=" + ent.CustomEmojiID + ")" + post
+		return prevText + pre + "![" + cleanCntnt + "](tg://emoji?id=" + ent.CustomEmojiId + ")" + post
 	case "text_mention":
-		return prevText + pre + "[" + cleanCntnt + "](tg://user?id=" + strconv.FormatInt(ent.User.ID, 10) + ")" + post
+		return prevText + pre + "[" + cleanCntnt + "](tg://user?id=" + strconv.FormatInt(ent.User.Id, 10) + ")" + post
 	case "text_link":
 		return prevText + pre + "[" + cleanCntnt + "](" + ent.Url + ")" + post
 	case "blockquote":

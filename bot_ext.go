@@ -31,8 +31,8 @@ func (bot *Bot) GetUpdatesChan(opts *GetUpdatesChanOpts) <-chan Update {
 			}
 
 			for _, update := range updates {
-				if update.UpdateID >= opts.GetUpdatesOpts.Offset {
-					opts.GetUpdatesOpts.Offset = update.UpdateID + 1
+				if update.UpdateId >= opts.GetUpdatesOpts.Offset {
+					opts.GetUpdatesOpts.Offset = update.UpdateId + 1
 					ch <- update
 				}
 			}

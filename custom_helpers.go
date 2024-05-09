@@ -13,11 +13,11 @@ func (m Message) GetLink() string {
 		return ""
 	}
 	if m.Chat.Username != "" {
-		return fmt.Sprintf("https://t.me/%s/%d", m.Chat.Username, m.MessageID)
+		return fmt.Sprintf("https://t.me/%s/%d", m.Chat.Username, m.MessageId)
 	}
 	// Message links use raw chatIDs without the -100 prefix; this trims that prefix.
-	rawChatID := strings.TrimPrefix(strconv.FormatInt(m.Chat.ID, 10), "-100")
-	return fmt.Sprintf("https://t.me/c/%s/%d", rawChatID, m.MessageID)
+	rawChatID := strings.TrimPrefix(strconv.FormatInt(m.Chat.Id, 10), "-100")
+	return fmt.Sprintf("https://t.me/c/%s/%d", rawChatID, m.MessageId)
 }
 
 // Reply is a helper function to easily call Bot.SendMessage as a reply to an existing message.
@@ -26,26 +26,26 @@ func (m Message) Reply(b *Bot, text string, opts *SendMessageOpts) (*Message, er
 		opts = &SendMessageOpts{}
 	}
 
-	if opts.ReplyParameters == nil || opts.ReplyParameters.MessageID == 0 {
-		opts.ReplyParameters = &ReplyParameters{MessageID: m.MessageID}
+	if opts.ReplyParameters == nil || opts.ReplyParameters.MessageId == 0 {
+		opts.ReplyParameters = &ReplyParameters{MessageId: m.MessageId}
 	}
 
-	return b.SendMessage(m.Chat.ID, text, opts)
+	return b.SendMessage(m.Chat.Id, text, opts)
 }
 
 // SendMessage is a helper function to easily call Bot.SendMessage in a chat.
 func (c Chat) SendMessage(b *Bot, text string, opts *SendMessageOpts) (*Message, error) {
-	return b.SendMessage(c.ID, text, opts)
+	return b.SendMessage(c.Id, text, opts)
 }
 
 // Unban is a helper function to easily call Bot.UnbanChatMember in a chat.
 func (c Chat) Unban(b *Bot, userID int64, opts *UnbanChatMemberOpts) (bool, error) {
-	return b.UnbanChatMember(c.ID, userID, opts)
+	return b.UnbanChatMember(c.Id, userID, opts)
 }
 
 // Promote is a helper function to easily call Bot.PromoteChatMember in a chat.
 func (c Chat) Promote(b *Bot, userID int64, opts *PromoteChatMemberOpts) (bool, error) {
-	return b.PromoteChatMember(c.ID, userID, opts)
+	return b.PromoteChatMember(c.Id, userID, opts)
 }
 
 // URL gets the URL the file can be downloaded from.
