@@ -47,7 +47,6 @@ func NewBot(token string, opts *BotOpts) (*Bot, error) {
 	// Large timeout on the initial GetMe request as this can sometimes be slow.
 	getMeReqOpts := &RequestOpts{
 		Timeout: 10 * time.Second,
-		APIURL:  DefaultAPIURL,
 	}
 
 	checkTokenValidity := true
@@ -91,7 +90,7 @@ func (bot *Bot) UseMiddleware(mw func(client BotClient) BotClient) *Bot {
 
 var ErrNilBotClient = errors.New("nil BotClient")
 
-func (bot *Bot) Request(method string, params map[string]string, data map[string]NamedReader, opts *RequestOpts) (json.RawMessage, error) {
+func (bot *Bot) Request(method string, params map[string]string, data map[string]FileReader, opts *RequestOpts) (json.RawMessage, error) {
 	if bot.BotClient == nil {
 		return nil, ErrNilBotClient
 	}
