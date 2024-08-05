@@ -7,6 +7,8 @@ import (
 	"github.com/kbgod/illuminate"
 )
 
+const BotContextKey = "illuminate-bot"
+
 type Context struct {
 	state        *string
 	router       *Router
@@ -21,7 +23,7 @@ type Context struct {
 }
 
 func newContext(ctx context.Context, router *Router, update *illuminate.Update) *Context {
-	return &Context{
+	updateCtx := &Context{
 		Context:      ctx,
 		indexHandler: -1,
 		indexRoute:   -1,
@@ -29,6 +31,11 @@ func newContext(ctx context.Context, router *Router, update *illuminate.Update) 
 		router:       router,
 		Bot:          router.bot,
 	}
+	bot, ok := ctx.Value(BotContextKey).(*illuminate.Bot)
+	if ok {
+		updateCtx.Bot = bot
+	}
+	return updateCtx
 }
 
 func (ctx *Context) SetParseMode(parseMode string) {
