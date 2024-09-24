@@ -1,6 +1,8 @@
 package illuminate
 
-import "time"
+import (
+	"time"
+)
 
 type GetUpdatesChanOpts struct {
 	*GetUpdatesOpts
@@ -40,4 +42,21 @@ func (bot *Bot) GetUpdatesChan(opts *GetUpdatesChanOpts) <-chan Update {
 	}()
 
 	return ch
+}
+
+func (bot *Bot) GetChannelAdministrators(username string, opts *GetChatAdministratorsOpts) ([]ChatMember, error) {
+	v := map[string]string{}
+	v["chat_id"] = username
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("getChatAdministrators", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	return unmarshalChatMemberArray(r)
 }
