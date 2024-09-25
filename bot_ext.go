@@ -1,6 +1,7 @@
 package illuminate
 
 import (
+	"context"
 	"encoding/json"
 	"time"
 )
@@ -62,6 +63,25 @@ func (bot *Bot) GetChannelAdministrators(username string, opts *GetChatAdministr
 	return unmarshalChatMemberArray(r)
 }
 
+func (bot *Bot) GetChannelAdministratorsWithContext(
+	ctx context.Context, username string, opts *GetChatAdministratorsOpts,
+) ([]ChatMember, error) {
+	v := map[string]string{}
+	v["chat_id"] = username
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "getChatAdministrators", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	return unmarshalChatMemberArray(r)
+}
+
 func (bot *Bot) GetChannel(username string, opts *GetChatOpts) (*ChatFullInfo, error) {
 	v := map[string]string{}
 	v["chat_id"] = username
@@ -72,6 +92,24 @@ func (bot *Bot) GetChannel(username string, opts *GetChatOpts) (*ChatFullInfo, e
 	}
 
 	r, err := bot.Request("getChat", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var c ChatFullInfo
+	return &c, json.Unmarshal(r, &c)
+}
+
+func (bot *Bot) GetChannelWithContext(ctx context.Context, username string, opts *GetChatOpts) (*ChatFullInfo, error) {
+	v := map[string]string{}
+	v["chat_id"] = username
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "getChat", v, nil, reqOpts)
 	if err != nil {
 		return nil, err
 	}
