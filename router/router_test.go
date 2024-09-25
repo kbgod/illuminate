@@ -2,12 +2,13 @@ package router
 
 import (
 	"errors"
-	"github.com/kbgod/illuminate"
 	"testing"
+
+	"github.com/kbgod/illuminate"
 )
 
 func TestRouterNew(t *testing.T) {
-	bot := illuminate.NewBot(illuminate.WithToken("test"))
+	bot, _ := illuminate.NewBot("test", nil)
 	router := New(bot)
 	if router == nil {
 		t.Error("New() = <nil>; want <Router>")

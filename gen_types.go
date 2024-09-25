@@ -1336,6 +1336,8 @@ type MergedChatBoostSource struct {
 	User *User `json:"user,omitempty"`
 	// Optional. Identifier of a message in the chat with the giveaway; the message could have been deleted already. May be 0 if the message isn't sent yet. (Only for giveaway)
 	GiveawayMessageId int64 `json:"giveaway_message_id,omitempty"`
+	// Optional. The number of Telegram Stars to be split between giveaway winners; for Telegram Star giveaways only (Only for giveaway)
+	PrizeStarCount int64 `json:"prize_star_count,omitempty"`
 	// Optional. True, if the giveaway was completed, but there was no user to win the prize (Only for giveaway)
 	IsUnclaimed bool `json:"is_unclaimed,omitempty"`
 }
@@ -1461,12 +1463,14 @@ func (v ChatBoostSourceGiftCode) chatBoostSource() {}
 
 // ChatBoostSourceGiveaway (https://core.telegram.org/bots/api#chatboostsourcegiveaway)
 //
-// The boost was obtained by the creation of a Telegram Premium giveaway. This boosts the chat 4 times for the duration of the corresponding Telegram Premium subscription.
+// The boost was obtained by the creation of a Telegram Premium or a Telegram Star giveaway. This boosts the chat 4 times for the duration of the corresponding Telegram Premium subscription for Telegram Premium giveaways and prize_star_count / 500 times for one year for Telegram Star giveaways.
 type ChatBoostSourceGiveaway struct {
 	// Identifier of a message in the chat with the giveaway; the message could have been deleted already. May be 0 if the message isn't sent yet.
 	GiveawayMessageId int64 `json:"giveaway_message_id"`
-	// Optional. User that won the prize in the giveaway if any
+	// Optional. User that won the prize in the giveaway if any; for Telegram Premium giveaways only
 	User *User `json:"user,omitempty"`
+	// Optional. The number of Telegram Stars to be split between giveaway winners; for Telegram Star giveaways only
+	PrizeStarCount int64 `json:"prize_star_count,omitempty"`
 	// Optional. True, if the giveaway was completed, but there was no user to win the prize
 	IsUnclaimed bool `json:"is_unclaimed,omitempty"`
 }
@@ -1482,6 +1486,7 @@ func (v ChatBoostSourceGiveaway) MergeChatBoostSource() MergedChatBoostSource {
 		Source:            "giveaway",
 		GiveawayMessageId: v.GiveawayMessageId,
 		User:              v.User,
+		PrizeStarCount:    v.PrizeStarCount,
 		IsUnclaimed:       v.IsUnclaimed,
 	}
 }
@@ -1771,6 +1776,10 @@ type ChatInviteLink struct {
 	MemberLimit int64 `json:"member_limit,omitempty"`
 	// Optional. Number of pending join requests created using this link
 	PendingJoinRequestCount int64 `json:"pending_join_request_count,omitempty"`
+	// Optional. The number of seconds the subscription will be active for before the next payment
+	SubscriptionPeriod int64 `json:"subscription_period,omitempty"`
+	// Optional. The amount of Telegram Stars a user must pay initially and after each subsequent subscription period to be a member of the chat using the link
+	SubscriptionPrice int64 `json:"subscription_price,omitempty"`
 }
 
 // ChatJoinRequest (https://core.telegram.org/bots/api#chatjoinrequest)
@@ -1869,6 +1878,8 @@ type MergedChatMember struct {
 	CanPinMessages bool `json:"can_pin_messages,omitempty"`
 	// Optional. True, if the user is allowed to create, rename, close, and reopen forum topics; for supergroups only (Only for administrator, restricted)
 	CanManageTopics bool `json:"can_manage_topics,omitempty"`
+	// Optional. Date when the user's subscription will expire; Unix time (Only for member, restricted, kicked)
+	UntilDate int64 `json:"until_date,omitempty"`
 	// Optional. True, if the user is a member of the chat at the moment of the request (Only for restricted)
 	IsMember bool `json:"is_member,omitempty"`
 	// Optional. True, if the user is allowed to send text messages, contacts, giveaways, giveaway winners, invoices, locations and venues (Only for restricted)
@@ -1891,8 +1902,6 @@ type MergedChatMember struct {
 	CanSendOtherMessages bool `json:"can_send_other_messages,omitempty"`
 	// Optional. True, if the user is allowed to add web page previews to their messages (Only for restricted)
 	CanAddWebPagePreviews bool `json:"can_add_web_page_previews,omitempty"`
-	// Optional. Date when restrictions will be lifted for this user; Unix time. If 0, then the user is restricted forever (Only for restricted, kicked)
-	UntilDate int64 `json:"until_date,omitempty"`
 }
 
 // GetStatus is a helper method to easily access the common fields of an interface.
@@ -2192,6 +2201,8 @@ func (v ChatMemberLeft) chatMember() {}
 type ChatMemberMember struct {
 	// Information about the user
 	User User `json:"user"`
+	// Optional. Date when the user's subscription will expire; Unix time
+	UntilDate int64 `json:"until_date,omitempty"`
 }
 
 // GetStatus is a helper method to easily access the common fields of an interface.
@@ -2207,8 +2218,9 @@ func (v ChatMemberMember) GetUser() User {
 // MergeChatMember returns a MergedChatMember struct to simplify working with types in a non-generic world.
 func (v ChatMemberMember) MergeChatMember() MergedChatMember {
 	return MergedChatMember{
-		Status: "member",
-		User:   v.User,
+		Status:    "member",
+		User:      v.User,
+		UntilDate: v.UntilDate,
 	}
 }
 
@@ -2841,7 +2853,9 @@ type Giveaway struct {
 	PrizeDescription string `json:"prize_description,omitempty"`
 	// Optional. A list of two-letter ISO 3166-1 alpha-2 country codes indicating the countries from which eligible users for the giveaway must come. If empty, then all users can participate in the giveaway. Users with a phone number that was bought on Fragment can always participate in giveaways.
 	CountryCodes []string `json:"country_codes,omitempty"`
-	// Optional. The number of months the Telegram Premium subscription won from the giveaway will be active for
+	// Optional. The number of Telegram Stars to be split between giveaway winners; for Telegram Star giveaways only
+	PrizeStarCount int64 `json:"prize_star_count,omitempty"`
+	// Optional. The number of months the Telegram Premium subscription won from the giveaway will be active for; for Telegram Premium giveaways only
 	PremiumSubscriptionMonthCount int64 `json:"premium_subscription_month_count,omitempty"`
 }
 
@@ -2855,12 +2869,17 @@ type GiveawayCompleted struct {
 	UnclaimedPrizeCount int64 `json:"unclaimed_prize_count,omitempty"`
 	// Optional. Message with the giveaway that was completed, if it wasn't deleted
 	GiveawayMessage *Message `json:"giveaway_message,omitempty"`
+	// Optional. True, if the giveaway is a Telegram Star giveaway. Otherwise, currently, the giveaway is a Telegram Premium giveaway.
+	IsStarGiveaway bool `json:"is_star_giveaway,omitempty"`
 }
 
 // GiveawayCreated (https://core.telegram.org/bots/api#giveawaycreated)
 //
-// This object represents a service message about the creation of a scheduled giveaway. Currently holds no information.
-type GiveawayCreated struct{}
+// This object represents a service message about the creation of a scheduled giveaway.
+type GiveawayCreated struct {
+	// Optional. The number of Telegram Stars to be split between giveaway winners; for Telegram Star giveaways only
+	PrizeStarCount int64 `json:"prize_star_count,omitempty"`
+}
 
 // GiveawayWinners (https://core.telegram.org/bots/api#giveawaywinners)
 //
@@ -2878,7 +2897,9 @@ type GiveawayWinners struct {
 	Winners []User `json:"winners,omitempty"`
 	// Optional. The number of other chats the user had to join in order to be eligible for the giveaway
 	AdditionalChatCount int64 `json:"additional_chat_count,omitempty"`
-	// Optional. The number of months the Telegram Premium subscription won from the giveaway will be active for
+	// Optional. The number of Telegram Stars that were split between giveaway winners; for Telegram Star giveaways only
+	PrizeStarCount int64 `json:"prize_star_count,omitempty"`
+	// Optional. The number of months the Telegram Premium subscription won from the giveaway will be active for; for Telegram Premium giveaways only
 	PremiumSubscriptionMonthCount int64 `json:"premium_subscription_month_count,omitempty"`
 	// Optional. Number of undistributed prizes
 	UnclaimedPrizeCount int64 `json:"unclaimed_prize_count,omitempty"`
@@ -4611,7 +4632,7 @@ type InputInvoiceMessageContent struct {
 	Title string `json:"title"`
 	// Product description, 1-255 characters
 	Description string `json:"description"`
-	// Bot-defined invoice payload, 1-128 bytes. This will not be displayed to the user, use for your internal processes.
+	// Bot-defined invoice payload, 1-128 bytes. This will not be displayed to the user, use it for your internal processes.
 	Payload string `json:"payload"`
 	// Optional. Payment provider token, obtained via @BotFather. Pass an empty string for payments in Telegram Stars.
 	ProviderToken string `json:"provider_token,omitempty"`
@@ -5883,9 +5904,9 @@ type Message struct {
 	MessageId int64 `json:"message_id"`
 	// Optional. Unique identifier of a message thread to which the message belongs; for supergroups only
 	MessageThreadId int64 `json:"message_thread_id,omitempty"`
-	// Optional. Sender of the message; empty for messages sent to channels. For backward compatibility, the field contains a fake sender user in non-channel chats, if the message was sent on behalf of a chat.
+	// Optional. Sender of the message; may be empty for messages sent to channels. For backward compatibility, if the message was sent on behalf of a chat, the field contains a fake sender user in non-channel chats
 	From *User `json:"from,omitempty"`
-	// Optional. Sender of the message, sent on behalf of a chat. For example, the channel itself for channel posts, the supergroup itself for messages from anonymous group administrators, the linked channel for messages automatically forwarded to the discussion group. For backward compatibility, the field from contains a fake sender user in non-channel chats, if the message was sent on behalf of a chat.
+	// Optional. Sender of the message when sent on behalf of a chat. For example, the supergroup itself for messages sent by its anonymous administrators or a linked channel for messages automatically forwarded to the channel's discussion group. For backward compatibility, if the message was sent on behalf of a chat, the field from contains a fake sender user in non-channel chats.
 	SenderChat *Chat `json:"sender_chat,omitempty"`
 	// Optional. If the sender of the message boosted the chat, the number of boosts added by the user
 	SenderBoostCount int64 `json:"sender_boost_count,omitempty"`
@@ -5999,6 +6020,8 @@ type Message struct {
 	Invoice *Invoice `json:"invoice,omitempty"`
 	// Optional. Message is a service message about a successful payment, information about the payment. More about payments: https://core.telegram.org/bots/api#payments
 	SuccessfulPayment *SuccessfulPayment `json:"successful_payment,omitempty"`
+	// Optional. Message is a service message about a refunded payment, information about the payment. More about payments: https://core.telegram.org/bots/api#payments
+	RefundedPayment *RefundedPayment `json:"refunded_payment,omitempty"`
 	// Optional. Service message: users were shared with the bot
 	UsersShared *UsersShared `json:"users_shared,omitempty"`
 	// Optional. Service message: a chat was shared with the bot
@@ -6113,6 +6136,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 		PinnedMessage                 json.RawMessage                `json:"pinned_message"`
 		Invoice                       *Invoice                       `json:"invoice"`
 		SuccessfulPayment             *SuccessfulPayment             `json:"successful_payment"`
+		RefundedPayment               *RefundedPayment               `json:"refunded_payment"`
 		UsersShared                   *UsersShared                   `json:"users_shared"`
 		ChatShared                    *ChatShared                    `json:"chat_shared"`
 		ConnectedWebsite              string                         `json:"connected_website"`
@@ -6210,6 +6234,7 @@ func (v *Message) UnmarshalJSON(b []byte) error {
 	}
 	v.Invoice = t.Invoice
 	v.SuccessfulPayment = t.SuccessfulPayment
+	v.RefundedPayment = t.RefundedPayment
 	v.UsersShared = t.UsersShared
 	v.ChatShared = t.ChatShared
 	v.ConnectedWebsite = t.ConnectedWebsite
@@ -6933,6 +6958,16 @@ func (v PaidMediaPreview) MarshalJSON() ([]byte, error) {
 
 // PaidMediaPreview.paidMedia is a dummy method to avoid interface implementation.
 func (v PaidMediaPreview) paidMedia() {}
+
+// PaidMediaPurchased (https://core.telegram.org/bots/api#paidmediapurchased)
+//
+// This object contains information about a paid media purchase.
+type PaidMediaPurchased struct {
+	// User who purchased the media
+	From User `json:"from"`
+	// Bot-specified paid media payload
+	PaidMediaPayload string `json:"paid_media_payload"`
+}
 
 // PaidMediaVideo (https://core.telegram.org/bots/api#paidmediavideo)
 //
@@ -7698,6 +7733,7 @@ func (v *ReactionCount) UnmarshalJSON(b []byte) error {
 // This object describes the type of a reaction. Currently, it can be one of
 //   - ReactionTypeEmoji
 //   - ReactionTypeCustomEmoji
+//   - ReactionTypePaid
 type ReactionType interface {
 	GetType() string
 	// MergeReactionType returns a MergedReactionType struct to simplify working with complex telegram types in a non-generic world.
@@ -7710,6 +7746,7 @@ type ReactionType interface {
 var (
 	_ ReactionType = ReactionTypeEmoji{}
 	_ ReactionType = ReactionTypeCustomEmoji{}
+	_ ReactionType = ReactionTypePaid{}
 )
 
 // MergedReactionType is a helper type to simplify interactions with the various ReactionType subtypes.
@@ -7792,6 +7829,14 @@ func unmarshalReactionType(d json.RawMessage) (ReactionType, error) {
 		}
 		return s, nil
 
+	case "paid":
+		s := ReactionTypePaid{}
+		err := json.Unmarshal(d, &s)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal ReactionType for value 'paid': %w", err)
+		}
+		return s, nil
+
 	}
 	return nil, fmt.Errorf("unknown interface for ReactionType with Type %v", t.Type)
 }
@@ -7869,6 +7914,55 @@ func (v ReactionTypeEmoji) MarshalJSON() ([]byte, error) {
 
 // ReactionTypeEmoji.reactionType is a dummy method to avoid interface implementation.
 func (v ReactionTypeEmoji) reactionType() {}
+
+// ReactionTypePaid (https://core.telegram.org/bots/api#reactiontypepaid)
+//
+// The reaction is paid.
+type ReactionTypePaid struct{}
+
+// GetType is a helper method to easily access the common fields of an interface.
+func (v ReactionTypePaid) GetType() string {
+	return "paid"
+}
+
+// MergeReactionType returns a MergedReactionType struct to simplify working with types in a non-generic world.
+func (v ReactionTypePaid) MergeReactionType() MergedReactionType {
+	return MergedReactionType{
+		Type: "paid",
+	}
+}
+
+// MarshalJSON is a custom JSON marshaller to allow for enforcing the Type value.
+func (v ReactionTypePaid) MarshalJSON() ([]byte, error) {
+	type alias ReactionTypePaid
+	a := struct {
+		Type string `json:"type"`
+		alias
+	}{
+		Type:  "paid",
+		alias: (alias)(v),
+	}
+	return json.Marshal(a)
+}
+
+// ReactionTypePaid.reactionType is a dummy method to avoid interface implementation.
+func (v ReactionTypePaid) reactionType() {}
+
+// RefundedPayment (https://core.telegram.org/bots/api#refundedpayment)
+//
+// This object contains basic information about a refunded payment.
+type RefundedPayment struct {
+	// Three-letter ISO 4217 currency code, or "XTR" for payments in Telegram Stars. Currently, always "XTR"
+	Currency string `json:"currency"`
+	// Total refunded price in the smallest units of the currency (integer, not float/double). For example, for a price of US$ 1.45, total_amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies).
+	TotalAmount int64 `json:"total_amount"`
+	// Bot-specified invoice payload
+	InvoicePayload string `json:"invoice_payload"`
+	// Telegram payment identifier
+	TelegramPaymentChargeId string `json:"telegram_payment_charge_id"`
+	// Optional. Provider payment identifier
+	ProviderPaymentChargeId string `json:"provider_payment_charge_id,omitempty"`
+}
 
 // ReplyKeyboardMarkup (https://core.telegram.org/bots/api#replykeyboardmarkup)
 //
@@ -8419,6 +8513,10 @@ type MergedTransactionPartner struct {
 	User *User `json:"user,omitempty"`
 	// Optional. Bot-specified invoice payload (Only for user)
 	InvoicePayload string `json:"invoice_payload,omitempty"`
+	// Optional. Information about the paid media bought by the user (Only for user)
+	PaidMedia []PaidMedia `json:"paid_media,omitempty"`
+	// Optional. Bot-specified paid media payload (Only for user)
+	PaidMediaPayload string `json:"paid_media_payload,omitempty"`
 	// Optional. State of the transaction if the transaction is outgoing (Only for fragment)
 	WithdrawalState RevenueWithdrawalState `json:"withdrawal_state,omitempty"`
 }
@@ -8644,6 +8742,36 @@ type TransactionPartnerUser struct {
 	User User `json:"user"`
 	// Optional. Bot-specified invoice payload
 	InvoicePayload string `json:"invoice_payload,omitempty"`
+	// Optional. Information about the paid media bought by the user
+	PaidMedia []PaidMedia `json:"paid_media,omitempty"`
+	// Optional. Bot-specified paid media payload
+	PaidMediaPayload string `json:"paid_media_payload,omitempty"`
+}
+
+// UnmarshalJSON is a custom JSON unmarshaller to use the helpers which allow for unmarshalling structs into interfaces.
+func (v *TransactionPartnerUser) UnmarshalJSON(b []byte) error {
+	// All fields in TransactionPartnerUser, with interface fields as json.RawMessage
+	type tmp struct {
+		User             User            `json:"user"`
+		InvoicePayload   string          `json:"invoice_payload"`
+		PaidMedia        json.RawMessage `json:"paid_media"`
+		PaidMediaPayload string          `json:"paid_media_payload"`
+	}
+	t := tmp{}
+	err := json.Unmarshal(b, &t)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal TransactionPartnerUser JSON into tmp struct: %w", err)
+	}
+
+	v.User = t.User
+	v.InvoicePayload = t.InvoicePayload
+	v.PaidMedia, err = unmarshalPaidMediaArray(t.PaidMedia)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal custom JSON field PaidMedia: %w", err)
+	}
+	v.PaidMediaPayload = t.PaidMediaPayload
+
+	return nil
 }
 
 // GetType is a helper method to easily access the common fields of an interface.
@@ -8654,9 +8782,11 @@ func (v TransactionPartnerUser) GetType() string {
 // MergeTransactionPartner returns a MergedTransactionPartner struct to simplify working with types in a non-generic world.
 func (v TransactionPartnerUser) MergeTransactionPartner() MergedTransactionPartner {
 	return MergedTransactionPartner{
-		Type:           "user",
-		User:           &v.User,
-		InvoicePayload: v.InvoicePayload,
+		Type:             "user",
+		User:             &v.User,
+		InvoicePayload:   v.InvoicePayload,
+		PaidMedia:        v.PaidMedia,
+		PaidMediaPayload: v.PaidMediaPayload,
 	}
 }
 
@@ -8713,6 +8843,8 @@ type Update struct {
 	ShippingQuery *ShippingQuery `json:"shipping_query,omitempty"`
 	// Optional. New incoming pre-checkout query. Contains full information about checkout
 	PreCheckoutQuery *PreCheckoutQuery `json:"pre_checkout_query,omitempty"`
+	// Optional. A user purchased paid media with a non-empty payload sent by the bot in a non-channel chat
+	PurchasedPaidMedia *PaidMediaPurchased `json:"purchased_paid_media,omitempty"`
 	// Optional. New poll state. Bots receive only updates about manually stopped polls and polls, which are sent by the bot
 	Poll *Poll `json:"poll,omitempty"`
 	// Optional. A user changed their answer in a non-anonymous poll. Bots receive new votes only in polls that were sent by the bot itself.
@@ -8757,6 +8889,8 @@ type User struct {
 	SupportsInlineQueries bool `json:"supports_inline_queries,omitempty"`
 	// Optional. True, if the bot can be connected to a Telegram Business account to receive its messages. Returned only in getMe.
 	CanConnectToBusiness bool `json:"can_connect_to_business,omitempty"`
+	// Optional. True, if the bot has a main Web App. Returned only in getMe.
+	HasMainWebApp bool `json:"has_main_web_app,omitempty"`
 }
 
 // UserChatBoosts (https://core.telegram.org/bots/api#userchatboosts)
