@@ -1,6 +1,7 @@
 package illuminate
 
 import (
+	"encoding/json"
 	"time"
 )
 
@@ -59,4 +60,22 @@ func (bot *Bot) GetChannelAdministrators(username string, opts *GetChatAdministr
 	}
 
 	return unmarshalChatMemberArray(r)
+}
+
+func (bot *Bot) GetChannel(username string, opts *GetChatOpts) (*ChatFullInfo, error) {
+	v := map[string]string{}
+	v["chat_id"] = username
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.Request("getChat", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var c ChatFullInfo
+	return &c, json.Unmarshal(r, &c)
 }
