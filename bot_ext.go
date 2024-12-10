@@ -3,6 +3,7 @@ package illuminate
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"time"
 )
 
@@ -29,6 +30,9 @@ func (bot *Bot) GetUpdatesChanWithContext(ctx context.Context, opts *GetUpdatesC
 		for {
 			updates, err := bot.GetUpdatesWithContext(ctx, opts.GetUpdatesOpts)
 			if err != nil {
+				if errors.Is(err, context.Canceled) {
+					return
+				}
 				if opts.ErrorHandler != nil {
 					opts.ErrorHandler(err)
 				}
