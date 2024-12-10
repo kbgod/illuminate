@@ -11,7 +11,7 @@ type Sender struct {
 	IsAutomaticForward bool
 	// The location that was sent to. Required to determine if the sender is a linked channel, an anonymous channel,
 	// or an anonymous admin.
-	ChatID int64
+	ChatId int64
 	// The custom admin title of the anonymous group administrator sender.
 	// Only available if IsAnonymousAdmin is true.
 	AuthorSignature string
@@ -23,15 +23,32 @@ func (m Message) GetSender() *Sender {
 		User:               m.From,
 		Chat:               m.SenderChat,
 		IsAutomaticForward: m.IsAutomaticForward,
-		ChatID:             m.Chat.Id,
+		ChatId:             m.Chat.Id,
 		AuthorSignature:    m.AuthorSignature,
 	}
 }
 
-// ID determines the sender ID.
+// GetSender populates the relevant fields of a Sender struct given a reaction.
+func (mru MessageReactionUpdated) GetSender() *Sender {
+	return &Sender{
+		User:   mru.User,
+		Chat:   mru.ActorChat,
+		ChatId: mru.Chat.Id,
+	}
+}
+
+// GetSender populates the relevant fields of a Sender struct given a poll answer.
+func (pa PollAnswer) GetSender() *Sender {
+	return &Sender{
+		User: pa.User,
+		Chat: pa.VoterChat,
+	}
+}
+
+// Id determines the sender ID.
 // When a message is being sent by a chat/channel, telegram usually populates the User field with dummy values.
-// For this reason, we prefer to return the Chat.ID if it is available, rather than a dummy User.ID.
-func (s Sender) ID() int64 {
+// For this reason, we prefer to return the Chat.Id if it is available, rather than a dummy User.Id.
+func (s Sender) Id() int64 {
 	if s.Chat != nil {
 		return s.Chat.Id
 	}
@@ -112,21 +129,21 @@ func (s Sender) IsBot() bool {
 // IsAnonymousAdmin returns true if the Sender is an anonymous admin sending to a group.
 // For channel posts in a channel, see IsChannelPost.
 func (s Sender) IsAnonymousAdmin() bool {
-	return s.Chat != nil && s.Chat.Id == s.ChatID && s.Chat.Type != "channel"
+	return s.Chat != nil && s.Chat.Id == s.ChatId && s.Chat.Type != "channel"
 }
 
 // IsChannelPost returns true if the Sender is a channel admin posting to that same channel.
 func (s Sender) IsChannelPost() bool {
-	return s.Chat != nil && s.Chat.Id == s.ChatID && s.Chat.Type == "channel"
+	return s.Chat != nil && s.Chat.Id == s.ChatId && s.Chat.Type == "channel"
 }
 
 // IsAnonymousChannel returns true if the Sender is an anonymous channel sending to a group.
 // For channel admins posting in their own channel, see IsChannelPost.
 func (s Sender) IsAnonymousChannel() bool {
-	return s.Chat != nil && s.Chat.Id != s.ChatID && !s.IsAutomaticForward && s.Chat.Type == "channel"
+	return s.Chat != nil && s.Chat.Id != s.ChatId && !s.IsAutomaticForward && s.Chat.Type == "channel"
 }
 
 // IsLinkedChannel returns true if the Sender is a linked channel sending to the group it is linked to.
 func (s Sender) IsLinkedChannel() bool {
-	return s.Chat != nil && s.Chat.Id != s.ChatID && s.IsAutomaticForward
+	return s.Chat != nil && s.Chat.Id != s.ChatId && s.IsAutomaticForward
 }

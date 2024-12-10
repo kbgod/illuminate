@@ -8,10 +8,45 @@ import (
 
 type GetUpdatesChanOpts struct {
 	*GetUpdatesOpts
-	Buffer       int
-	ErrorHandler func(error)
+	Buffer          int
+	ErrorHandler    func(error)
+	ShutdownTimeout time.Duration
 }
 
+func (bot *Bot) GetUpdatesChanWithContext(ctx context.Context, opts *GetUpdatesChanOpts) <-chan Update {
+	defaultOpts := &GetUpdatesChanOpts{
+		Buffer: 100,
+		GetUpdatesOpts: &GetUpdatesOpts{
+			Timeout: 600,
+		},
+	}
+	if opts == nil {
+		opts = defaultOpts
+	}
+	ch := make(chan Update, opts.Buffer)
+	go func() {
+		defer close(ch)
+		for {
+			updates, err := bot.GetUpdatesWithContext(ctx, opts.GetUpdatesOpts)
+			if err != nil {
+				if opts.ErrorHandler != nil {
+					opts.ErrorHandler(err)
+				}
+				time.Sleep(time.Second * 3)
+				continue
+			}
+
+			for _, update := range updates {
+				if update.UpdateId >= opts.GetUpdatesOpts.Offset {
+					opts.GetUpdatesOpts.Offset = update.UpdateId + 1
+					ch <- update
+				}
+			}
+		}
+	}()
+
+	return ch
+}
 func (bot *Bot) GetUpdatesChan(opts *GetUpdatesChanOpts) <-chan Update {
 	defaultOpts := &GetUpdatesChanOpts{
 		Buffer: 100,
@@ -24,6 +59,7 @@ func (bot *Bot) GetUpdatesChan(opts *GetUpdatesChanOpts) <-chan Update {
 	}
 	ch := make(chan Update, opts.Buffer)
 	go func() {
+		defer close(ch)
 		for {
 			updates, err := bot.GetUpdates(opts.GetUpdatesOpts)
 			if err != nil {

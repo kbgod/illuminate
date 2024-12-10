@@ -535,6 +535,8 @@ type CopyMessageOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -578,6 +580,7 @@ func (bot *Bot) CopyMessageWithContext(ctx context.Context, chatId int64, fromCh
 		v["show_caption_above_media"] = strconv.FormatBool(opts.ShowCaptionAboveMedia)
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -811,8 +814,12 @@ func (bot *Bot) CreateForumTopicWithContext(ctx context.Context, chatId int64, n
 
 // CreateInvoiceLinkOpts is the set of optional fields for Bot.CreateInvoiceLink and Bot.CreateInvoiceLinkWithContext.
 type CreateInvoiceLinkOpts struct {
+	// Unique identifier of the business connection on behalf of which the link will be created. For payments in Telegram Stars only.
+	BusinessConnectionId string
 	// Payment provider token, obtained via @BotFather. Pass an empty string for payments in Telegram Stars.
 	ProviderToken string
+	// The number of seconds the subscription will be active for before the next payment. The currency must be set to "XTR" (Telegram Stars) if the parameter is used. Currently, it must always be 2592000 (30 days) if specified. Any number of subscriptions can be active for a given bot at the same time, including multiple concurrent subscriptions from the same user. Subscription price must no exceed 2500 Telegram Stars.
+	SubscriptionPeriod int64
 	// The maximum accepted amount for tips in the smallest units of the currency (integer, not float/double). For example, for a maximum tip of US$ 1.45 pass max_tip_amount = 145. See the exp parameter in currencies.json, it shows the number of digits past the decimal point for each currency (2 for the majority of currencies). Defaults to 0. Not supported for payments in Telegram Stars.
 	MaxTipAmount int64
 	// A JSON-serialized array of suggested amounts of tips in the smallest units of the currency (integer, not float/double). At most 4 suggested tip amounts can be specified. The suggested tip amounts must be positive, passed in a strictly increased order and must not exceed max_tip_amount.
@@ -873,7 +880,11 @@ func (bot *Bot) CreateInvoiceLinkWithContext(ctx context.Context, title string, 
 		v["prices"] = string(bs)
 	}
 	if opts != nil {
+		v["business_connection_id"] = opts.BusinessConnectionId
 		v["provider_token"] = opts.ProviderToken
+		if opts.SubscriptionPeriod != 0 {
+			v["subscription_period"] = strconv.FormatInt(opts.SubscriptionPeriod, 10)
+		}
 		if opts.MaxTipAmount != 0 {
 			v["max_tip_amount"] = strconv.FormatInt(opts.MaxTipAmount, 10)
 		}
@@ -1725,7 +1736,7 @@ type EditMessageMediaOpts struct {
 
 // EditMessageMedia (https://core.telegram.org/bots/api#editmessagemedia)
 //
-// Use this method to edit animation, audio, document, photo, or video messages. If a message is part of a message album, then it can be edited only to an audio for audio albums, only to a document for document albums and to a photo or a video otherwise. When an inline message is edited, a new file can't be uploaded; use a previously uploaded file via its file_id or specify a URL. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned. Note that business messages that were not sent by the bot and do not contain an inline keyboard can only be edited within 48 hours from the time they were sent.
+// Use this method to edit animation, audio, document, photo, or video messages, or to add media to text messages. If a message is part of a message album, then it can be edited only to an audio for audio albums, only to a document for document albums and to a photo or a video otherwise. When an inline message is edited, a new file can't be uploaded; use a previously uploaded file via its file_id or specify a URL. On success, if the edited message is not an inline message, the edited Message is returned, otherwise True is returned. Note that business messages that were not sent by the bot and do not contain an inline keyboard can only be edited within 48 hours from the time they were sent.
 //   - media (type InputMedia): A JSON-serialized object for a new media content of the message
 //   - opts (type EditMessageMediaOpts): All optional parameters.
 func (bot *Bot) EditMessageMedia(media InputMedia, opts *EditMessageMediaOpts) (*Message, bool, error) {
@@ -1932,6 +1943,44 @@ func (bot *Bot) EditMessageTextWithContext(ctx context.Context, text string, opt
 
 }
 
+// EditUserStarSubscriptionOpts is the set of optional fields for Bot.EditUserStarSubscription and Bot.EditUserStarSubscriptionWithContext.
+type EditUserStarSubscriptionOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// EditUserStarSubscription (https://core.telegram.org/bots/api#edituserstarsubscription)
+//
+// Allows the bot to cancel or re-enable extension of a subscription paid in Telegram Stars. Returns True on success.
+//   - userId (type int64): Identifier of the user whose subscription will be edited
+//   - telegramPaymentChargeId (type string): Telegram payment identifier for the subscription
+//   - isCanceled (type bool): Pass True to cancel extension of the user subscription; the subscription must be active up to the end of the current subscription period. Pass False to allow the user to re-enable a subscription that was previously canceled by the bot.
+//   - opts (type EditUserStarSubscriptionOpts): All optional parameters.
+func (bot *Bot) EditUserStarSubscription(userId int64, telegramPaymentChargeId string, isCanceled bool, opts *EditUserStarSubscriptionOpts) (bool, error) {
+	return bot.EditUserStarSubscriptionWithContext(context.Background(), userId, telegramPaymentChargeId, isCanceled, opts)
+}
+
+// EditUserStarSubscriptionWithContext is the same as Bot.EditUserStarSubscription, but with a context.Context parameter
+func (bot *Bot) EditUserStarSubscriptionWithContext(ctx context.Context, userId int64, telegramPaymentChargeId string, isCanceled bool, opts *EditUserStarSubscriptionOpts) (bool, error) {
+	v := map[string]string{}
+	v["user_id"] = strconv.FormatInt(userId, 10)
+	v["telegram_payment_charge_id"] = telegramPaymentChargeId
+	v["is_canceled"] = strconv.FormatBool(isCanceled)
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "editUserStarSubscription", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
 // ExportChatInviteLinkOpts is the set of optional fields for Bot.ExportChatInviteLink and Bot.ExportChatInviteLinkWithContext.
 type ExportChatInviteLinkOpts struct {
 	// RequestOpts are an additional optional field to configure timeouts for individual requests
@@ -2072,6 +2121,38 @@ func (bot *Bot) ForwardMessagesWithContext(ctx context.Context, chatId int64, fr
 
 	var m []MessageId
 	return m, json.Unmarshal(r, &m)
+}
+
+// GetAvailableGiftsOpts is the set of optional fields for Bot.GetAvailableGifts and Bot.GetAvailableGiftsWithContext.
+type GetAvailableGiftsOpts struct {
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// GetAvailableGifts (https://core.telegram.org/bots/api#getavailablegifts)
+//
+// Returns the list of gifts that can be sent by the bot to users. Requires no parameters. Returns a Gifts object.
+//   - opts (type GetAvailableGiftsOpts): All optional parameters.
+func (bot *Bot) GetAvailableGifts(opts *GetAvailableGiftsOpts) (*Gifts, error) {
+	return bot.GetAvailableGiftsWithContext(context.Background(), opts)
+}
+
+// GetAvailableGiftsWithContext is the same as Bot.GetAvailableGifts, but with a context.Context parameter
+func (bot *Bot) GetAvailableGiftsWithContext(ctx context.Context, opts *GetAvailableGiftsOpts) (*Gifts, error) {
+	v := map[string]string{}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "getAvailableGifts", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var g Gifts
+	return &g, json.Unmarshal(r, &g)
 }
 
 // GetBusinessConnectionOpts is the set of optional fields for Bot.GetBusinessConnection and Bot.GetBusinessConnectionWithContext.
@@ -3378,6 +3459,60 @@ func (bot *Bot) RevokeChatInviteLinkWithContext(ctx context.Context, chatId int6
 	return &c, json.Unmarshal(r, &c)
 }
 
+// SavePreparedInlineMessageOpts is the set of optional fields for Bot.SavePreparedInlineMessage and Bot.SavePreparedInlineMessageWithContext.
+type SavePreparedInlineMessageOpts struct {
+	// Pass True if the message can be sent to private chats with users
+	AllowUserChats bool
+	// Pass True if the message can be sent to private chats with bots
+	AllowBotChats bool
+	// Pass True if the message can be sent to group and supergroup chats
+	AllowGroupChats bool
+	// Pass True if the message can be sent to channel chats
+	AllowChannelChats bool
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SavePreparedInlineMessage (https://core.telegram.org/bots/api#savepreparedinlinemessage)
+//
+// Stores a message that can be sent by a user of a Mini App. Returns a PreparedInlineMessage object.
+//   - userId (type int64): Unique identifier of the target user that can use the prepared message
+//   - result (type InlineQueryResult): A JSON-serialized object describing the message to be sent
+//   - opts (type SavePreparedInlineMessageOpts): All optional parameters.
+func (bot *Bot) SavePreparedInlineMessage(userId int64, result InlineQueryResult, opts *SavePreparedInlineMessageOpts) (*PreparedInlineMessage, error) {
+	return bot.SavePreparedInlineMessageWithContext(context.Background(), userId, result, opts)
+}
+
+// SavePreparedInlineMessageWithContext is the same as Bot.SavePreparedInlineMessage, but with a context.Context parameter
+func (bot *Bot) SavePreparedInlineMessageWithContext(ctx context.Context, userId int64, result InlineQueryResult, opts *SavePreparedInlineMessageOpts) (*PreparedInlineMessage, error) {
+	v := map[string]string{}
+	v["user_id"] = strconv.FormatInt(userId, 10)
+	bs, err := json.Marshal(result)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal field result: %w", err)
+	}
+	v["result"] = string(bs)
+	if opts != nil {
+		v["allow_user_chats"] = strconv.FormatBool(opts.AllowUserChats)
+		v["allow_bot_chats"] = strconv.FormatBool(opts.AllowBotChats)
+		v["allow_group_chats"] = strconv.FormatBool(opts.AllowGroupChats)
+		v["allow_channel_chats"] = strconv.FormatBool(opts.AllowChannelChats)
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "savePreparedInlineMessage", v, nil, reqOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	var p PreparedInlineMessage
+	return &p, json.Unmarshal(r, &p)
+}
+
 // SendAnimationOpts is the set of optional fields for Bot.SendAnimation and Bot.SendAnimationWithContext.
 type SendAnimationOpts struct {
 	// Unique identifier of the business connection on behalf of which the message will be sent
@@ -3406,6 +3541,8 @@ type SendAnimationOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -3472,6 +3609,7 @@ func (bot *Bot) SendAnimationWithContext(ctx context.Context, chatId int64, anim
 		v["has_spoiler"] = strconv.FormatBool(opts.HasSpoiler)
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -3527,6 +3665,8 @@ type SendAudioOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -3588,6 +3728,7 @@ func (bot *Bot) SendAudioWithContext(ctx context.Context, chatId int64, audio In
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -3680,6 +3821,8 @@ type SendContactOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -3716,6 +3859,7 @@ func (bot *Bot) SendContactWithContext(ctx context.Context, chatId int64, phoneN
 		v["vcard"] = opts.Vcard
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -3759,6 +3903,8 @@ type SendDiceOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -3790,6 +3936,7 @@ func (bot *Bot) SendDiceWithContext(ctx context.Context, chatId int64, opts *Sen
 		v["emoji"] = opts.Emoji
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -3841,6 +3988,8 @@ type SendDocumentOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -3897,6 +4046,7 @@ func (bot *Bot) SendDocumentWithContext(ctx context.Context, chatId int64, docum
 		v["disable_content_type_detection"] = strconv.FormatBool(opts.DisableContentTypeDetection)
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -3938,6 +4088,8 @@ type SendGameOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -3970,6 +4122,7 @@ func (bot *Bot) SendGameWithContext(ctx context.Context, chatId int64, gameShort
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -3997,6 +4150,59 @@ func (bot *Bot) SendGameWithContext(ctx context.Context, chatId int64, gameShort
 
 	var m Message
 	return &m, json.Unmarshal(r, &m)
+}
+
+// SendGiftOpts is the set of optional fields for Bot.SendGift and Bot.SendGiftWithContext.
+type SendGiftOpts struct {
+	// Text that will be shown along with the gift; 0-255 characters
+	Text string
+	// Mode for parsing entities in the text. See formatting options for more details. Entities other than "bold", "italic", "underline", "strikethrough", "spoiler", and "custom_emoji" are ignored.
+	TextParseMode string
+	// A JSON-serialized list of special entities that appear in the gift text. It can be specified instead of text_parse_mode. Entities other than "bold", "italic", "underline", "strikethrough", "spoiler", and "custom_emoji" are ignored.
+	TextEntities []MessageEntity
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SendGift (https://core.telegram.org/bots/api#sendgift)
+//
+// Sends a gift to the given user. The gift can't be converted to Telegram Stars by the user. Returns True on success.
+//   - userId (type int64): Unique identifier of the target user that will receive the gift
+//   - giftId (type string): Identifier of the gift
+//   - opts (type SendGiftOpts): All optional parameters.
+func (bot *Bot) SendGift(userId int64, giftId string, opts *SendGiftOpts) (bool, error) {
+	return bot.SendGiftWithContext(context.Background(), userId, giftId, opts)
+}
+
+// SendGiftWithContext is the same as Bot.SendGift, but with a context.Context parameter
+func (bot *Bot) SendGiftWithContext(ctx context.Context, userId int64, giftId string, opts *SendGiftOpts) (bool, error) {
+	v := map[string]string{}
+	v["user_id"] = strconv.FormatInt(userId, 10)
+	v["gift_id"] = giftId
+	if opts != nil {
+		v["text"] = opts.Text
+		v["text_parse_mode"] = opts.TextParseMode
+		if opts.TextEntities != nil {
+			bs, err := json.Marshal(opts.TextEntities)
+			if err != nil {
+				return false, fmt.Errorf("failed to marshal field text_entities: %w", err)
+			}
+			v["text_entities"] = string(bs)
+		}
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "sendGift", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
 }
 
 // SendInvoiceOpts is the set of optional fields for Bot.SendInvoice and Bot.SendInvoiceWithContext.
@@ -4039,6 +4245,8 @@ type SendInvoiceOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -4114,6 +4322,7 @@ func (bot *Bot) SendInvoiceWithContext(ctx context.Context, chatId int64, title 
 		v["is_flexible"] = strconv.FormatBool(opts.IsFlexible)
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -4161,6 +4370,8 @@ type SendLocationOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -4207,6 +4418,7 @@ func (bot *Bot) SendLocationWithContext(ctx context.Context, chatId int64, latit
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -4248,6 +4460,8 @@ type SendMediaGroupOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent messages from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -4293,6 +4507,7 @@ func (bot *Bot) SendMediaGroupWithContext(ctx context.Context, chatId int64, med
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -4333,6 +4548,8 @@ type SendMessageOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -4380,6 +4597,7 @@ func (bot *Bot) SendMessageWithContext(ctx context.Context, chatId int64, text s
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -4429,6 +4647,8 @@ type SendPaidMediaOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Description of the message to reply to
 	ReplyParameters *ReplyParameters
 	// Additional interface options. A JSON-serialized object for an inline keyboard, custom reply keyboard, instructions to remove a reply keyboard or to force a reply from the user
@@ -4484,6 +4704,7 @@ func (bot *Bot) SendPaidMediaWithContext(ctx context.Context, chatId int64, star
 		v["show_caption_above_media"] = strconv.FormatBool(opts.ShowCaptionAboveMedia)
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
 			if err != nil {
@@ -4534,6 +4755,8 @@ type SendPhotoOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -4584,6 +4807,7 @@ func (bot *Bot) SendPhotoWithContext(ctx context.Context, chatId int64, photo In
 		v["has_spoiler"] = strconv.FormatBool(opts.HasSpoiler)
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -4649,6 +4873,8 @@ type SendPollOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -4720,6 +4946,7 @@ func (bot *Bot) SendPollWithContext(ctx context.Context, chatId int64, question 
 		v["is_closed"] = strconv.FormatBool(opts.IsClosed)
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -4763,6 +4990,8 @@ type SendStickerOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -4803,6 +5032,7 @@ func (bot *Bot) SendStickerWithContext(ctx context.Context, chatId int64, sticke
 		v["emoji"] = opts.Emoji
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -4852,6 +5082,8 @@ type SendVenueOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -4894,6 +5126,7 @@ func (bot *Bot) SendVenueWithContext(ctx context.Context, chatId int64, latitude
 		v["google_place_type"] = opts.GooglePlaceType
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -4955,6 +5188,8 @@ type SendVideoOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -5022,6 +5257,7 @@ func (bot *Bot) SendVideoWithContext(ctx context.Context, chatId int64, video In
 		v["supports_streaming"] = strconv.FormatBool(opts.SupportsStreaming)
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -5069,6 +5305,8 @@ type SendVideoNoteOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -5121,6 +5359,7 @@ func (bot *Bot) SendVideoNoteWithContext(ctx context.Context, chatId int64, vide
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -5170,6 +5409,8 @@ type SendVoiceOpts struct {
 	DisableNotification bool
 	// Protects the contents of the sent message from forwarding and saving
 	ProtectContent bool
+	// Pass True to allow up to 1000 messages per second, ignoring broadcasting limits for a fee of 0.1 Telegram Stars per message. The relevant Stars will be withdrawn from the bot's balance
+	AllowPaidBroadcast bool
 	// Unique identifier of the message effect to be added to the message; for private chats only
 	MessageEffectId string
 	// Description of the message to reply to
@@ -5221,6 +5462,7 @@ func (bot *Bot) SendVoiceWithContext(ctx context.Context, chatId int64, voice In
 		}
 		v["disable_notification"] = strconv.FormatBool(opts.DisableNotification)
 		v["protect_content"] = strconv.FormatBool(opts.ProtectContent)
+		v["allow_paid_broadcast"] = strconv.FormatBool(opts.AllowPaidBroadcast)
 		v["message_effect_id"] = opts.MessageEffectId
 		if opts.ReplyParameters != nil {
 			bs, err := json.Marshal(opts.ReplyParameters)
@@ -6196,6 +6438,50 @@ func (bot *Bot) SetStickerSetTitleWithContext(ctx context.Context, name string, 
 	}
 
 	r, err := bot.RequestWithContext(ctx, "setStickerSetTitle", v, nil, reqOpts)
+	if err != nil {
+		return false, err
+	}
+
+	var b bool
+	return b, json.Unmarshal(r, &b)
+}
+
+// SetUserEmojiStatusOpts is the set of optional fields for Bot.SetUserEmojiStatus and Bot.SetUserEmojiStatusWithContext.
+type SetUserEmojiStatusOpts struct {
+	// Custom emoji identifier of the emoji status to set. Pass an empty string to remove the status.
+	EmojiStatusCustomEmojiId string
+	// Expiration date of the emoji status, if any
+	EmojiStatusExpirationDate int64
+	// RequestOpts are an additional optional field to configure timeouts for individual requests
+	RequestOpts *RequestOpts
+}
+
+// SetUserEmojiStatus (https://core.telegram.org/bots/api#setuseremojistatus)
+//
+// Changes the emoji status for a given user that previously allowed the bot to manage their emoji status via the Mini App method requestEmojiStatusAccess. Returns True on success.
+//   - userId (type int64): Unique identifier of the target user
+//   - opts (type SetUserEmojiStatusOpts): All optional parameters.
+func (bot *Bot) SetUserEmojiStatus(userId int64, opts *SetUserEmojiStatusOpts) (bool, error) {
+	return bot.SetUserEmojiStatusWithContext(context.Background(), userId, opts)
+}
+
+// SetUserEmojiStatusWithContext is the same as Bot.SetUserEmojiStatus, but with a context.Context parameter
+func (bot *Bot) SetUserEmojiStatusWithContext(ctx context.Context, userId int64, opts *SetUserEmojiStatusOpts) (bool, error) {
+	v := map[string]string{}
+	v["user_id"] = strconv.FormatInt(userId, 10)
+	if opts != nil {
+		v["emoji_status_custom_emoji_id"] = opts.EmojiStatusCustomEmojiId
+		if opts.EmojiStatusExpirationDate != 0 {
+			v["emoji_status_expiration_date"] = strconv.FormatInt(opts.EmojiStatusExpirationDate, 10)
+		}
+	}
+
+	var reqOpts *RequestOpts
+	if opts != nil {
+		reqOpts = opts.RequestOpts
+	}
+
+	r, err := bot.RequestWithContext(ctx, "setUserEmojiStatus", v, nil, reqOpts)
 	if err != nil {
 		return false, err
 	}
